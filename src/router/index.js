@@ -1,16 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Cart from '@/components/Cart.vue'
-import Home from '@/components/Home.vue'
-import Main from '@/components/Main.vue'
-import Profile from '@/components/Profile.vue'
-
+import GoodDetail from '@/components/GoodDetail.vue';
+import MainPage from '@/components/MainPage.vue'
+// import Profile from '@/components/Profile.vue'
+import Login from '@/components/Login.vue';
 // Vue.use(VueRouter)
 
 const routes = [
     {
         path: '/',
-        name: 'main',
-        component: Main
+        name: 'mainpage',
+        component: MainPage
+    },
+    {
+        path: '/GoodDetail',
+        name: 'GoodDetail',
+        component: GoodDetail
     },
     {
         path: '/cart',
@@ -18,10 +23,11 @@ const routes = [
         component: Cart
     },
     {
-        path: '/profile',
-        name: 'profile',
-        component: Profile
+        path: '/login',
+        name: 'login',
+        component: Login
     }
+
 ]
 
 const router = createRouter({

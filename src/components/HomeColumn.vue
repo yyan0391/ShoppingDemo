@@ -46,23 +46,25 @@
   
   <style>
   
-  .home-header {
+  /* .home-header {
     position: fixed;
     left: 0;
     top: 0;
     width: 100%;
     background-color: #fff;
-    z-index: 999;
+    z-index: 999; */
   
-    .top-text {
+    /* .top-text {
         padding: 10px 0;
         line-height: 1.5;
     }
   
     .tap-menu {
-      /* 添加必要的样式 */
+      
       padding: 0 10px;
-    }
-  }
+    } */
+
+
+  /* } */
   </style>
   

@@ -1,0 +1,64 @@
+{
+    "products": [
+      {
+        "id": 1,
+        "title": "啤酒",
+        "description": "这是商品 1 的描述这是啤酒这是啤酒这是啤酒",
+        "price": "50.00",
+        "quantity": 10,
+        "tag": "热销",
+        "image": "./src/assets/imgs/酒饮.png",
+        "isInCart": false
+      },
+      {
+        "id": 2,
+        "title": "冷冻鸡翅",
+        "description": "这是商品 2 的描述",
+        "price": "30.00",
+        "quantity": 5,
+        "tag": "推荐",
+        "image": "./src/assets/imgs/肉蛋.png",
+        "isInCart": false
+      },
+      {
+        "id": 3,
+        "title": "张君雅小妹妹巧克力味甜甜圈",
+        "description": "这是商品 3 的描述",
+        "price": "20.00",
+        "quantity": 8,
+        "tag": "新品",
+        "image": "./src/assets/imgs/零食.png",
+        "isInCart": false
+      },
+      {
+        "id": 4,
+        "title": "速冻",
+        "description": "这是商品 3 的描述",
+        "price": "20.00",
+        "quantity": 8,
+        "tag": "新品",
+        "image": "./src/assets/imgs/速冻.png",
+        "isInCart": false
+      },
+      {
+        "id": 5,
+        "title": "李子",
+        "description": "这是商品 3 的描述",
+        "price": "10.00",
+        "quantity": 2,
+        "tag": "新品",
+        "image": "./src/assets/imgs/水果.png",
+        "isInCart": false
+      },
+      {
+        "id": 6,
+        "title": "芦笋",
+        "description": "这是商品 3 的描述",
+        "price": "2.00",
+        "quantity": 6,
+        "tag": "新品",
+        "image": "./src/assets/imgs/蔬菜.png",
+        "isInCart": false
+      }
+    ]
+  }
