@@ -8,7 +8,8 @@
         "quantity": 10,
         "tag": "热销",
         "image": "./src/assets/imgs/酒饮.png",
-        "isInCart": false
+        "isInCart": false,
+        "count": 0
       },
       {
         "id": 2,
@@ -18,7 +19,8 @@
         "quantity": 5,
         "tag": "推荐",
         "image": "./src/assets/imgs/肉蛋.png",
-        "isInCart": false
+        "isInCart": false,
+        "count": 0
       },
       {
         "id": 3,
@@ -28,7 +30,8 @@
         "quantity": 8,
         "tag": "新品",
         "image": "./src/assets/imgs/零食.png",
-        "isInCart": false
+        "isInCart": false,
+        "count": 0
       },
       {
         "id": 4,
@@ -38,7 +41,8 @@
         "quantity": 8,
         "tag": "新品",
         "image": "./src/assets/imgs/速冻.png",
-        "isInCart": false
+        "isInCart": false,
+        "count": 0
       },
       {
         "id": 5,
@@ -48,7 +52,8 @@
         "quantity": 2,
         "tag": "新品",
         "image": "./src/assets/imgs/水果.png",
-        "isInCart": false
+        "isInCart": false,
+        "count": 0
       },
       {
         "id": 6,
@@ -58,7 +63,8 @@
         "quantity": 6,
         "tag": "新品",
         "image": "./src/assets/imgs/蔬菜.png",
-        "isInCart": false
+        "isInCart": false,
+        "count": 0
       }
     ]
   }

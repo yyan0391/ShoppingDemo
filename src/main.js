@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import Vant from 'vant';
-import { ActionBar, ActionBarIcon, ActionBarButton,SubmitBar, Swipe, SwipeItem, showToast,Checkbox, CheckboxGroup } from 'vant';
+import {CouponCell, CouponList,Dialog, SwipeCell, Toast,ActionBar, ActionBarIcon, ActionBarButton, SubmitBar, Swipe, SwipeItem, showToast,Checkbox, CheckboxGroup } from 'vant';
 import router from './router'
 import store from './store';
 
@@ -28,6 +28,11 @@ app.use(SwipeItem);
 app.use(showToast);
 app.use(Checkbox);
 app.use(CheckboxGroup);
+app.use(Toast);
+app.use(SwipeCell);
+app.use(Dialog);
+app.use(CouponList);
+app.use(CouponCell);
 
 app.mount('#app');
 

@@ -5,28 +5,34 @@
         <span @click="CartManage">管理</span>
       </template>
     </van-nav-bar>
-    <van-cell-group inset>
-      <van-cell v-for="item in cartGoods" clickable :key="item" :title="item.title">
-        <template #left-icon>
-          <van-checkbox :name="item" :ref="el => checkboxRefs[index] = el" @click.stop />
-        </template>
-      </van-cell>
-    </van-cell-group>
+    <van-empty v-if="cartGoods.length === 0" description="你还没有添加任何商品哦~">
+      <van-button round type="primary" class="bottom-button" @click="GotoHome">挑选商品</van-button>
+    </van-empty>
 
-    <!-- <van-checkbox-group v-model="checked">
-      <van-cell-group inset>
-        <van-cell v-for="item in cartGoods" clickable :key="item" :title="item.title" @click="toggle(index)">
-          <template #left-icon>
-            <van-checkbox :name="item" :ref="el => checkboxRefs[index] = el" @click.stop />
-          </template>
-        </van-cell>
-      </van-cell-group>
-    </van-checkbox-group> -->
+    <van-swipe-cell v-for="item in cartGoods" :key="item.id">
+
+      <template #left>
+        <van-button square text="删除" type="danger" class="delete-button" @click="confirmDelete(item)" />
+      </template>
+
+      <van-card :title="item.title" :thumb="item.image" :desc="item.description" :price="item.price * item.count">
+        <template #footer>
+          <van-stepper v-model="item.count" theme="round" button-size="22" />
+        </template>
+      </van-card>
+
+    </van-swipe-cell>
+
 
     <footer class="dp-footer">
-      <van-submit-bar :price="3050" button-text="结算" @submit="onSubmit">
+      <van-submit-bar 
+        :price="amount" 
+        :button-disabled="amount === 0" 
+        button-text="结算" 
+        :button-color="amount === 0 ? '#ccc' : '#ff9900'"
+        @submit="onClickCheckOut">
         <van-checkbox v-model="checked">全选</van-checkbox>
-        <template #tip> Some tips, <span @click="onClickLink">全选</span> </template>
+        <template #tip> Some tips, <span @click="onClickCheck">全选</span> </template>
       </van-submit-bar>
     </footer>
 
@@ -34,7 +40,10 @@
 </template>
 
 <script>
+import { showConfirmDialog, showToast} from 'vant';
+
 export default {
+  name: 'cart',
   setup() {
     const onSubmit = () => showToast('Submit');
     const onClickLink = () => showToast('Click Link');
@@ -55,6 +64,17 @@ export default {
       cartGoods.forEach(good => {
         result += good.price * good.count;
       })
+      return result * 100;
+    },
+    counter() {
+      let that = this;
+      let cartGoods = this.$store.state.cartGoods;
+      let result = 0;
+      cartGoods.some(good => {
+        if (good.id === that.id) {
+          result = good.count;
+        }
+      });
       return result;
     },
     //合计
@@ -80,6 +100,38 @@ export default {
         path: '/CartManage',
       })
     },
+    GotoHome() {
+      this.$router.push({
+        path: '/Home',
+      })
+    },
+    confirmDelete(item) {
+      showConfirmDialog({
+        title: '确认删除商品吗？',
+        message:
+          '一旦删除商品，将不可回退操作。',
+        confirmButtonText: '删除',
+        cancelButtonText: '再想想',
+      })
+        .then(() => {
+          this.dialogVisible = false;
+          this.$store.commit('deleteGoodsFromCart', item.id);
+        })
+        .catch(() => {
+          // on cancel
+        });
+
+    },
+    onClickCheckOut() {
+      if (this.amount > 0) {
+        this.$router.push({
+        path: '/CheckOut',
+      })
+      }else {
+        showToast('请先选择商品');
+      }
+      
+    },
   },
 };
 </script>
@@ -92,20 +144,22 @@ export default {
   position: fixed;
   bottom: 0;
   left: 0;
+  /* margin-bottom: 65px; */
   border-top: 1px solid #eee;
   background-color: #fff;
   font-size: 0;
 
   .van-submit-bar {
     position: absolute;
-    /* 让 van-action-bar 定位在 footer 的顶部 */
     top: 0;
-    /* 靠近 footer 的顶部 */
     left: 0;
     width: 100%;
-    /* 占满 footer 的宽度 */
     z-index: 1;
-    /* 确保它显示在其他内容上方 */
   }
+}
+
+.delete-button {
+  height: 100%;
+  width: 100%;
 }
 </style>

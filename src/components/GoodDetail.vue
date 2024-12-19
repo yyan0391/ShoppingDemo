@@ -2,7 +2,7 @@
     <div>
         <van-nav-bar title="商品详情" left-text="返回" @click-left="goBack" class="custom-title"></van-nav-bar>
         <van-row>
-            <img :src="goods.image" alt="商品图片" class="product-image" />
+            <img :src="items.image" alt="商品图片" class="product-image" />
         </van-row>
 
 
@@ -10,7 +10,7 @@
         <van-cell size="large" style="background-color: red;">
             <template #title>
                 <span style="font-weight: bold;font-size: 16px; color: whitesmoke">¥ </span>
-                <span style="font-weight: bold; font-size: 24px; color: whitesmoke;">{{ goods.price }}</span>
+                <span style="font-weight: bold; font-size: 24px; color: whitesmoke;">{{ items.price }}</span>
             </template>
             <template #value>
                 <span style="color: whitesmoke;">已售 1万+</span>
@@ -23,10 +23,10 @@
 
         <van-cell style="margin: 10px 10px;" :border="false">
             <template #title>
-                <span style="font-weight: bold;font-size: 18px;">{{ goods.title }}</span>
+                <span style="font-weight: bold;font-size: 18px;">{{ items.title }}</span>
             </template>
             <template #label>
-                <span style="color: #888; font-size: 14px;">{{ goods.description }}</span>
+                <span style="color: #888; font-size: 14px;">{{ items.description }}</span>
                 <div style="margin-top: 8px;">
                     <van-rate v-model="value" :size="15" color="#ffd21e" void-icon="star" void-color="#eee" />
                     <span style="margin-left: 8px;">{{ value }}.0</span>
@@ -53,10 +53,10 @@
 
 
 
-        <footer class="dp-footer">
+        <footer class="gd-footer">
             <van-action-bar>
                 <van-action-bar-icon icon="chat-o" text="客服" color="#ee0a24" />
-                <van-action-bar-icon icon="cart-o" :badge="cartCounter" >购物车
+                <van-action-bar-icon icon="cart-o" :badge="cartCounter" @click="GoToCart" >购物车
                     <!-- <template #badge>
                         <span v-show="cartCounter > 0">{{ cartCounter }}</span>
                     </template> -->
@@ -72,19 +72,14 @@
 </template>
 
 <script>
+import { showSuccessToast, showFailToast } from 'vant';
 
 export default {
     name: "GoodDetail",
     data() {
         return {
             value: 3,
-            // id: this.$route.params.id,
-            // title: this.$route.params.title,
-            // description: this.$route.params.description,
-            // price: this.$route.params.price,
-            // quantity: this.$route.params.quantity,
-            // tag: this.$route.params.tag,
-            // image: this.$route.params.image,
+            items: JSON.parse(this.$route.query.items || '[]'),
         };
     },
     computed: {
@@ -95,25 +90,31 @@ export default {
             return this.$route.query;
         }
     },
-
+   
     methods: {
         goBack() {
             this.$router.go(-1);
         },
         addGoodsToCart() {
-            let isInCart = this.goods.isInCart;
+            let isInCart = this.items.isInCart;
             
             if (isInCart) {
-                this.$store.commit('addGoods', this.goods.id);
-                console.log(this.$store.state.cartCounter);
+                this.$store.commit('addGoods', this.items.id);
+                showSuccessToast('添加购物车成功');
             } else {
-                this.$store.commit('addGoodsToCart', this.goods);
+                this.$store.commit('addGoodsToCart', this.items);
+                showSuccessToast('添加购物车成功');
             }
         },
         updatedNavImg() {
             //解决主页与详情页切换时，菜单栏无法更新获取当前路由的问题
             this.$store.state.cartCounter++;
             this.$store.state.cartCounter--;
+        },
+        GoToCart() {
+            this.$router.push({
+                path: '/cart',
+            })
         },
 
     },
@@ -122,7 +123,7 @@ export default {
 
 </script>
 <style>
-.dp-footer {
+.gd-footer {
     width: 100%;
     height: 8%;
     position: fixed;

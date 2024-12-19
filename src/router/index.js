@@ -2,33 +2,39 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Cart from '@/components/Cart.vue'
 import GoodDetail from '@/components/GoodDetail.vue';
 import MainPage from '@/components/MainPage.vue'
-// import Profile from '@/components/Profile.vue'
+import Profile from '@/components/Profile.vue'
 import Login from '@/components/Login.vue';
+import Home from '@/components/Home.vue';
+import CheckOut from '@/components/CheckOut.vue';
 // Vue.use(VueRouter)
+
+
 
 const routes = [
     {
         path: '/',
-        name: 'mainpage',
-        component: MainPage
+        component: MainPage,
+        meta: { showNavbar: true }, // MainPage 显示 navbar
+        children: [
+            { path: '', redirect: '/home' },
+            { path: 'home', component: Home, meta: { active: 0 } },
+            { path: 'cart', component: Cart, meta: { active: 1 } },
+            { path: 'profile', component: Profile, meta: { active: 2 } },
+        ],
     },
     {
         path: '/GoodDetail',
-        name: 'GoodDetail',
-        component: GoodDetail
+        component: GoodDetail,
+        meta: { showNavbar: false },
+        props: true, 
     },
     {
-        path: '/cart',
-        name: 'cart',
-        component: Cart
+        path: '/CheckOut',
+        component: CheckOut,
+        meta: { showNavbar: false },
+        props: true, 
     },
-    {
-        path: '/login',
-        name: 'login',
-        component: Login
-    }
-
-]
+];
 
 const router = createRouter({
     history: createWebHistory(),

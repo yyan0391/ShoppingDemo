@@ -30,6 +30,7 @@
             </template>
         </van-card>
 
+       
 
 
     </div>
@@ -50,8 +51,10 @@ import product8 from '@/assets/imgs/IMG_1016.png';
 // import product11 from '@/assets/imgs/速冻.png';
 import goodsData from '@/assets/goods.json';
 import GoodDetail from './GoodDetail.vue';
+import { showSuccessToast, showFailToast } from 'vant';
 
 export default {
+    name: 'home',
     data() {
         return {
             value: '',
@@ -62,6 +65,7 @@ export default {
                 product7,
                 product8,
             ],
+            showPopupGoodDetail: false,
             
             products: [],
         }
@@ -90,7 +94,10 @@ export default {
         GoDetial(item) {
             this.$router.push({
                 path: '/GoodDetail',
-                query: item
+                query: {
+                    items: JSON.stringify(item),
+                },
+                // state: { item: item }
                 // query: {
                 //     id: item.id,
                 //     title: item.title,
@@ -103,11 +110,14 @@ export default {
             })
         },
         onAddToCart(item) {
-            let isInCart = this.goods.isInCart;
+            let isInCart = item.isInCart;
+            console.log(this.$store.state.cartGoods);
             if (isInCart) {
-                this.$store.commit('addGoods', this.goods.id);
+                this.$store.commit('addGoods', item.id);
+                showSuccessToast('添加购物车成功');
             } else {
-                this.$store.commit('addGoodsToCart', this.goods);
+                this.$store.commit('addGoodsToCart', item);
+                showSuccessToast('添加购物车成功');
             }
         },
     }
