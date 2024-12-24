@@ -9,7 +9,8 @@
         "tag": "热销",
         "image": "./src/assets/imgs/酒饮.png",
         "isInCart": false,
-        "count": 0
+        "count": 0,
+        "isInCheck": false
       },
       {
         "id": 2,
@@ -20,7 +21,8 @@
         "tag": "推荐",
         "image": "./src/assets/imgs/肉蛋.png",
         "isInCart": false,
-        "count": 0
+        "count": 0,
+        "isInCheck": false
       },
       {
         "id": 3,
@@ -31,7 +33,8 @@
         "tag": "新品",
         "image": "./src/assets/imgs/零食.png",
         "isInCart": false,
-        "count": 0
+        "count": 0,
+        "isInCheck": false
       },
       {
         "id": 4,
@@ -42,7 +45,8 @@
         "tag": "新品",
         "image": "./src/assets/imgs/速冻.png",
         "isInCart": false,
-        "count": 0
+        "count": 0,
+        "isInCheck": false
       },
       {
         "id": 5,
@@ -53,18 +57,20 @@
         "tag": "新品",
         "image": "./src/assets/imgs/水果.png",
         "isInCart": false,
-        "count": 0
+        "count": 0,
+        "isInCheck": false
       },
       {
         "id": 6,
         "title": "芦笋",
         "description": "这是商品 3 的描述",
-        "price": "2.00",
+        "price": "4.00",
         "quantity": 6,
         "tag": "新品",
         "image": "./src/assets/imgs/蔬菜.png",
         "isInCart": false,
-        "count": 0
+        "count": 0,
+        "isInCheck": false
       }
     ]
   }

@@ -1,9 +1,10 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import Vant from 'vant';
-import {CouponCell, CouponList,Dialog, SwipeCell, Toast,ActionBar, ActionBarIcon, ActionBarButton, SubmitBar, Swipe, SwipeItem, showToast,Checkbox, CheckboxGroup } from 'vant';
+import {AddressEdit,AddressList,ActionSheet,Divider,CouponCell, CouponList,Dialog, SwipeCell, Toast,ActionBar, ActionBarIcon, ActionBarButton, SubmitBar, Swipe, SwipeItem, showToast,Checkbox, CheckboxGroup } from 'vant';
 import router from './router'
 import store from './store';
+
 
 
 import './assets/main.css'
@@ -13,6 +14,8 @@ import 'vant/lib/index.css';
 
 // import axios from 'axios'
 // import Antd from 'ant-design-vue'
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebaseConfig";
 
 
 const app = createApp(App);
@@ -33,6 +36,10 @@ app.use(SwipeCell);
 app.use(Dialog);
 app.use(CouponList);
 app.use(CouponCell);
+app.use(Divider);
+app.use(ActionSheet);
+app.use(AddressList);
+app.use(AddressEdit);
 
 app.mount('#app');
 

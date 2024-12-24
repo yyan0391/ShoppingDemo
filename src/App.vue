@@ -8,16 +8,15 @@ export default {
 
 <template>
   <div id="app">
-    <transition
-      name="fade"
-      mode="out-in" 
-    >
-    <router-view to="/" />
-  </transition>
-    
-
+    <router-view v-slot="{ Component }">
+      <transition
+        name="fade"
+        mode="out-in"
+      >
+        <component :is="Component" />
+      </transition>
+    </router-view>
   </div>
-
 </template>
 
 <style scoped>
@@ -33,7 +32,7 @@ export default {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: opacity 0.3s ease;
 }
 .fade-enter-from,
 .fade-leave-to {

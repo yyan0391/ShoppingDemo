@@ -1,6 +1,6 @@
 <template>
     <div>
-        <van-nav-bar title="商品详情" left-text="返回" @click-left="goBack" class="custom-title"></van-nav-bar>
+        <van-nav-bar title="商品详情" left-text="返回" left-arrow @click-left="goBack" class="custom-title"></van-nav-bar>
         <van-row>
             <img :src="items.image" alt="商品图片" class="product-image" />
         </van-row>

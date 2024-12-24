@@ -1,33 +1,43 @@
 <template>
     <div class="checkout">
-        <van-nav-bar title="我的购物车" left-text="返回" left-arrow class="custom-title" @click-left="onClickLeft">
+        <van-nav-bar title="确认订单" left-text="返回" left-arrow class="custom-title" @click-left="onClickLeft">
         </van-nav-bar>
-<van-row>
-        <Divider content="收货地址" />  
 
-<van-cell-group inset class="address-cell">
-    <van-cell :title="address ? address : '选择地址'" icon="location-o"  value="新建" is-link
-            @click="GoToAddress" >
-        </van-cell>
-</van-cell-group>
-        
-</van-row>
+        <van-divider />
+
+        <van-cell-group inset class="address-cell">
+            <van-cell icon="location-o" value="所有地址" is-link @click="GoToAddress">
+                <template #title>
+                    <span style="font-weight: bold;">{{ address ? address.name + ' ' + address.tel : '请选择地址' }}</span>
+                </template>
+                <template #label>
+                    <span style="font-weight: bold;">{{ address ? address.address : '' }}</span>
+                </template>
+
+            </van-cell>
+        </van-cell-group>
+
         <van-card-group>
             <van-card v-for="item in cartGoods" :key="item.id" :title="item.title" :thumb="item.image"
                 :desc="item.description" :price="item.price * item.count" :num="item.count" class="card">
+
+                <template #tags>
+                    <van-tag type="default">单价：¥{{ item.price }}</van-tag>
+                </template>
             </van-card>
 
         </van-card-group>
 
-
         <van-cell-group inset>
-            <van-cell title="商品原价">
+            <van-cell title="商品总价">
                 <template #value>
-                    <span style="font-weight: bold;">¥ {{ amount/100 }}</span>
+                    <span style="font-weight: bold;">¥ {{ amount / 100 }}</span>
                 </template>
             </van-cell>
-            <van-cell title="配送服务" is-link value="次日达"></van-cell>
-            <van-cell title="运费" :value="postageDisplay">
+            <van-cell title="配送服务" is-link :value="selectedValue || '请选择'" @click="show = true"></van-cell>
+            <van-action-sheet v-model:show="show" :actions="actions" cancel-text="取消" description="配送方式"
+                close-on-click-action @select="onSelect" />
+            <van-cell title="运费（消费满49元包邮*）" :value="postageDisplay">
             </van-cell>
             <van-coupon-cell :coupons="coupons" :chosen-coupon="chosenCoupon" @click="showList = true" />
         </van-cell-group>
@@ -40,7 +50,7 @@
 
 
         <footer class="co-footer">
-            <van-submit-bar :price="pay" button-text="去支付" @submit="onClickpay">
+            <van-submit-bar :price="pay" button-text="去支付" @submit="onClickpay" tip-icon="info-o">
                 <template #tip> {{ shippingTip }} </template>
             </van-submit-bar>
         </footer>
@@ -53,16 +63,17 @@
 <script>
 import { Divider } from 'vant';
 import { ref } from 'vue';
+import { showConfirmDialog, showToast } from 'vant';
+
 export default {
-    data() {
-        return {
-            showNavbar: true,
-            needPostage: true,
-            postage: 12,
-            postageFinal: 0,
-        }
-    },
     setup() {
+        const show = ref(false);
+        const actions = [
+            { name: '顺丰普快' },
+            { name: '顺丰特快' },
+            { name: '次日达', subname: '购物专供' },
+        ];
+
         const coupon = {
             available: 1,
             originCondition: 0,
@@ -118,35 +129,80 @@ export default {
             onExchange,
             chosenCoupon,
             disabledCoupons: [coupon],
+            show,
+            actions,
         };
+    },
+    data() {
+        return {
+            showNavbar: true,
+            needPostage: true,
+            postage: 12,
+            postageFinal: 0,
+            selectedValue: '',
+        }
     },
     name: 'CheckOut',
     methods: {
         onClickLeft() {
+            showConfirmDialog({
+        title: '确定返回吗？',
+        message:
+          '返回后，当前选择的配送方式和优惠券将不被保存，需重新选择。',
+        confirmButtonText: '返回',
+        cancelButtonText: '再想想',
+      })
+        .then(() => {
             this.$router.go(-1);
+        })
+        .catch(() => {
+          // on cancel
+        });
+            
         },
         onClickpay() {
-            this.$router.push({
+            if (this.address === null) {
+                showToast('请选择地址');
+                return;
+            } else if (this.selectedValue === '') {
+                showToast('请选择配送方式');
+                return;
+            } else if (this.ifLogin === flase) {
+                showToast('请先登录');
+                return;
+            } else {
+             
+                showToast('支付成功');
+                this.$router.push({
                 path: '/pay',
             })
+            }
+            
         },
         GoToAddress() {
             this.$router.push({
                 path: '/address',
             })
         },
+        onSelect(action) {
+            this.selectedValue = action.name;
+            this.show = false;
+        },
     },
-    
+
     computed: {
         cartGoods() {
-            return this.$store.state.cartGoods;
+            return this.$store.state.checkGoods;
         },
         address() {
-            return this.$store.state.address;
+            return this.$store.state.selectedAddress;
+        },
+        ifLogin() {
+            return this.$store.state.isLogin;
         },
         //商品总价
         amount() {
-            let cartGoods = this.$store.state.cartGoods;
+            let cartGoods = this.$store.state.checkGoods;
             let result = 0;
             cartGoods.forEach(good => {
                 result += good.price * good.count;
@@ -155,7 +211,7 @@ export default {
         },
         counter() {
             let that = this;
-            let cartGoods = this.$store.state.cartGoods;
+            let cartGoods = this.$store.state.checkGoods;
             let result = 0;
             cartGoods.some(good => {
                 if (good.id === that.id) {
@@ -165,39 +221,39 @@ export default {
             return result;
         },
         postageAmount() {
-        // 如果总金额 >= 49 元，则运费为 0；否则运费为 12 元（以分为单位）
-        return this.amount >= 4900 ? 0 : this.postage * 100;
-    },
-    shippingTip() {
-        if (this.amount >= 4900) {
-            return "实际消费满49元包邮，已包邮";
-        } else {
-            const remaining = (4900 - this.amount) / 100; // 计算还需消费金额
-            return `实际消费满49元包邮，仍需消费 ¥${remaining.toFixed(2)}`;
-        }
-    },
+            // 如果总金额 >= 49 元，则运费为 0；否则运费为 12 元（以分为单位）
+            return this.amount >= 4900 ? 0 : this.postage * 100;
+        },
+        shippingTip() {
+            if (this.amount >= 4900) {
+                return "实际消费满49元免邮费，已包邮";
+            } else {
+                const remaining = (4900 - this.amount) / 100; // 计算还需消费金额
+                return `实际消费满49元免邮费，仍需消费 ¥${remaining.toFixed(2)}`;
+            }
+        },
 
-    // 合计支付金额
-    pay() {
-        // 获取当前选中优惠券金额
-        let discount = 0;
-        if (this.chosenCoupon !== -1) {
-            discount = this.coupons[this.chosenCoupon].value; // 获取选中优惠券的 value
-        }
+        // 合计支付金额
+        pay() {
+            // 获取当前选中优惠券金额
+            let discount = 0;
+            if (this.chosenCoupon !== -1) {
+                discount = this.coupons[this.chosenCoupon].value; // 获取选中优惠券的 value
+            }
 
-        // 计算优惠后的总金额
-        let total = this.amount - discount;
+            // 计算优惠后的总金额
+            let total = this.amount - discount;
 
-        // 判断是否需要运费
-        total += this.postageAmount;
+            // 判断是否需要运费
+            total += this.postageAmount;
 
-        // 最小值为 0，防止出现负数
-        return Math.max(total, 0);
-    },
-    postageDisplay() {
-        // 运费金额格式化为 "元"
-        return `¥ ${(this.postageAmount / 100).toFixed(2)}`;
-    },
+            // 最小值为 0，防止出现负数
+            return Math.max(total, 0);
+        },
+        postageDisplay() {
+            // 运费金额格式化为 "元"
+            return `¥ ${(this.postageAmount / 100).toFixed(2)}`;
+        },
     },
 }
 
@@ -206,23 +262,15 @@ export default {
 <style>
 .checkout {
     background: #eee;
-    /* 确保背景图片覆盖整个页面 */
-    /* margin: 0; */
-    /* 清除默认外边距 */
-    /* padding: 0; */
-    /* 清除默认内边距 */
     min-height: 90vh;
     color: #fff;
 }
 
 .address-cell {
     /* border-radius: 12px; */
-    margin-top: 8px;
+    /* width: 100%; */
     padding: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    /* 可选：添加阴影效果 */
-    /* overflow: hidden; */
-    /* 避免内容超出圆角范围 */
 }
 
 .card {

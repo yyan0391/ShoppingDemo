@@ -6,7 +6,8 @@ import Profile from '@/components/Profile.vue'
 import Login from '@/components/Login.vue';
 import Home from '@/components/Home.vue';
 import CheckOut from '@/components/CheckOut.vue';
-// Vue.use(VueRouter)
+import Address from '@/components/Address.vue';
+import Register from '@/components/Register.vue';
 
 
 
@@ -34,6 +35,25 @@ const routes = [
         meta: { showNavbar: false },
         props: true, 
     },
+    {
+        path: '/Address',
+        component: Address,
+        meta: { showNavbar: false },
+        props: true, 
+    },
+    {
+        path: '/Login',
+        component: Login,
+        meta: { showNavbar: false },
+        props: true,
+    },
+    {
+        path: '/Register',
+        component: Register,
+        meta: { showNavbar: false },
+        props: true,
+    },
+    
 ];
 
 const router = createRouter({
