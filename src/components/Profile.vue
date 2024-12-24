@@ -26,8 +26,6 @@
       class="edit-button"
     >
       修改个人信息
-
-      
     </van-button>
     </div>
     
