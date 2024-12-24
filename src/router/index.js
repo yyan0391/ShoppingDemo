@@ -8,8 +8,8 @@ import Home from '@/components/Home.vue';
 import CheckOut from '@/components/CheckOut.vue';
 import Address from '@/components/Address.vue';
 import Register from '@/components/Register.vue';
-
-
+import Settings from '@/components/Settings.vue';
+import Notification from '@/components/Notification.vue';
 
 const routes = [
     {
@@ -50,6 +50,18 @@ const routes = [
     {
         path: '/Register',
         component: Register,
+        meta: { showNavbar: false },
+        props: true,
+    },
+    {
+        path: '/Settings',
+        component: Settings,
+        meta: { showNavbar: false },
+        props: true,
+    },
+    {
+        path: '/Notification',
+        component: Notification,
         meta: { showNavbar: false },
         props: true,
     },

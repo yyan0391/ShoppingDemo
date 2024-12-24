@@ -1,3 +1,4 @@
+
 export default {
     namespaced: true,
     state: {
@@ -15,5 +16,9 @@ export default {
       username(state) {
         return state.user?.displayName || "未登录，请点击登录";
       },
+      isLogin(state) {
+        return !!state.user; // 返回是否已登录
+      },
+
     },
   };

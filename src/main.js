@@ -1,9 +1,16 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import Vant from 'vant';
-import {AddressEdit,AddressList,ActionSheet,Divider,CouponCell, CouponList,Dialog, SwipeCell, Toast,ActionBar, ActionBarIcon, ActionBarButton, SubmitBar, Swipe, SwipeItem, showToast,Checkbox, CheckboxGroup } from 'vant';
+import {Loading, Uploader,AddressEdit,AddressList,ActionSheet,Divider,CouponCell, CouponList,Dialog, SwipeCell, Toast,ActionBar, ActionBarIcon, ActionBarButton, SubmitBar, Swipe, SwipeItem, showToast,Checkbox, CheckboxGroup } from 'vant';
 import router from './router'
 import store from './store';
+import {
+    Skeleton,
+    SkeletonTitle,
+    SkeletonImage,
+    SkeletonAvatar,
+    SkeletonParagraph,
+  } from 'vant';
 
 
 
@@ -40,6 +47,13 @@ app.use(Divider);
 app.use(ActionSheet);
 app.use(AddressList);
 app.use(AddressEdit);
+app.use(Uploader);
+app.use(Loading);
+app.use(Skeleton);
+app.use(SkeletonTitle);
+app.use(SkeletonImage);
+app.use(SkeletonAvatar);
+app.use(SkeletonParagraph);
 
 app.mount('#app');
 

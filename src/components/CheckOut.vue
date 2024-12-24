@@ -55,6 +55,9 @@
             </van-submit-bar>
         </footer>
 
+        <van-popup v-model:show="showLogin" style="border-radius: 24px;" closeable close-icon="cross" close-icon-position="top-right">
+            <Login @loginSuccess="handleLoginSuccess" />
+        </van-popup>
 
 
     </div>
@@ -64,8 +67,14 @@
 import { Divider } from 'vant';
 import { ref } from 'vue';
 import { showConfirmDialog, showToast } from 'vant';
+import { mapGetters } from "vuex";
+import Login from "@/components/Login.vue";
 
 export default {
+    name: "checkout",
+    components: {
+        Login,
+    },
     setup() {
         const show = ref(false);
         const actions = [
@@ -140,6 +149,7 @@ export default {
             postage: 12,
             postageFinal: 0,
             selectedValue: '',
+            showLogin: false,
         }
     },
     name: 'CheckOut',
@@ -167,9 +177,10 @@ export default {
             } else if (this.selectedValue === '') {
                 showToast('请选择配送方式');
                 return;
-            } else if (this.ifLogin === flase) {
+            } else if (this.isLogin === false) {
                 showToast('请先登录');
-                return;
+                this.showLogin = true;
+                
             } else {
              
                 showToast('支付成功');
@@ -191,14 +202,15 @@ export default {
     },
 
     computed: {
+        
+    // ...mapState("auth", ["user"]),
+    ...mapGetters("auth", ["username","isLogin"]),
+
         cartGoods() {
             return this.$store.state.checkGoods;
         },
         address() {
             return this.$store.state.selectedAddress;
-        },
-        ifLogin() {
-            return this.$store.state.isLogin;
         },
         //商品总价
         amount() {

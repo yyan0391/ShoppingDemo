@@ -10,19 +10,27 @@
     </van-nav-bar>
 
     <!-- 头像和用户名 -->
-    <div class="profile-header" @click="checkLogin">
+    <div class="profile-header"  @click="checkLogin">
       <van-image
         round
         width="80px"
         height="80px"
-        :src="isLogin ? userAvatar : defaultAvatar"
+        :src="userAvatar"
       />
-      <!-- <p class="username">{{ isLogin ? username : '未登录，立即登录' }}</p> -->
       <p class="username">{{ username }}</p>
+
+      <van-button
+ 
+      size="small"
+      round
+      class="edit-button"
+    >
+      修改个人信息
+    </van-button>
     </div>
+    
 
-
-    <van-popup v-model:show="showLogin"  style="border-radius: 24px;" closeable close-icon="cross" close-icon-position="top-right">
+    <van-popup v-model:show="showLogin"  style="border-radius: 24px; width: 350px; height: 550px;" closeable close-icon="cross" close-icon-position="top-right">
       <Login @loginSuccess="handleLoginSuccess" />
     </van-popup>
 
@@ -85,10 +93,10 @@
   </van-cell-group>
     
 
-    <!-- 登录提示弹窗 -->
-    <van-dialog v-model:show="showDialog" title="提示" show-cancel-button>
+    
+    <!-- <van-dialog v-model:show="showDialog" title="提示" show-cancel-button>
       请先登录。
-    </van-dialog>
+    </van-dialog> -->
   </div>
   </div>
 </template>
@@ -105,53 +113,40 @@ export default {
   components: { Login },
   data() {
     return {
-      // username: "", // 用户名
-      userAvatar: "https://via.placeholder.com/80", // 用户头像
+      avatarLoading: true, // 头像加载状态
       defaultAvatar: "https://via.placeholder.com/80?text=未登录", // 默认头像
       showLogin: false, // 控制弹窗显示
     };
   },
   computed: {
-    isLogin() {
-      return !!auth.currentUser; // 判断是否已登录
-    },
-    // username() {
-    //   return auth.currentUser ? auth.currentUser.displayName : "";
-    // },
-    ...mapGetters("auth", ["username"]),
-    // username() {
-    //   return this.user?.displayName || "未登录";
-    // },
+    // ...mapState("auth", ["user"]),
+    ...mapGetters("auth", ["username","isLogin"]),
+    userAvatar() {
+    return this.isLogin && this.$store.state.auth.user.photoURL
+      ? this.$store.state.auth.user.photoURL
+      : this.defaultAvatar;
   },
-  mounted() {
-    // 监听用户登录状态变化
-    // auth.onAuthStateChanged((user) => {
-    //   if (user) {
-    //     // this.userAvatar = user.photoURL || this.defaultAvatar;
-    //     this.username = user.displayName;
-    //   } else {
-    //     this.userAvatar = this.defaultAvatar;
-    //     this.username = "";
-    //   }
-    // });
   },
+
   methods: {
+    onAvatarLoad() {
+      this.avatarLoading = false; // 图片加载成功后隐藏 loading
+    },
     // 检查登录状态
     checkLogin() {
       if (!this.isLogin) {
         this.showLogin = true; // 未登录，弹出提示框
       } else {
-        // 登录后跳转到个人信息页面
-        // this.$router.push({ path: "/Profile/Edit" });
+        console.log("已登录，点击无效");
       }
     },
     // 处理通知
     handleNotification() {
       if (!this.isLogin) {
-        this.showDialog = true;
+        this.showLogin = true;
       } else {
         // 登录后处理通知
-        this.$router.push({ path: "/Profile/Notifications" });
+        this.$router.push({ path: "Notification" });
       }
     },
     // 我的订单
@@ -182,18 +177,16 @@ export default {
     handleSetting() {
       if (!this.isLogin) {
         this.showDialog = true;
+        showFailToast('请先登录');
       } else {
-        this.$router.push({ path: "/Profile/Settings" });
+        this.$router.push({ path: "/Settings" });
       }
     },
-    handleLoginSuccess() {
+    handleLoginSuccess(user) {
       this.showLogin = false;
+      console.log("头像 URL:", this.userAvatar);
+      // this.$store.commit("auth/setUser", user);
       showSuccessToast('登录成功');
-      // this.user = user; 
-    // this.$nextTick(() => {
-    //   // 确保数据更新后触发渲染
-    //   this.showPopup = false;
-    // });
     },
   }
     
@@ -206,30 +199,42 @@ export default {
   min-height: 100vh;
 }
 .profile-header {
+  position: relative; /* 关键：为子元素的绝对定位提供参考 */
   display: flex;
+  align-items: center; /* 垂直居中对齐 */
   text-align: center;
   margin-bottom: 1px;
   padding: 16px;
   background: #f5f5f5;
   border-radius: 8px;
-  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
+}
+.edit-button {
+  position: absolute; /* 绝对定位 */
+  right: 16px; /* 距离右边 16px */
+  bottom: 16px; /* 距离底部 16px */
+  font-size: 12px; /* 调整按钮文字大小 */
+  padding: 4px 8px; /* 调整按钮内边距 */
+}
+
+.username {
+  margin-left: 16px;
+  flex: 1; /* 占据剩余空间 */
+  text-align: left; /* 左对齐 */
+  font-size: 16px;
+  color: #333;
 }
 
 .profile-content {
   /* text-align: center; */
   margin-bottom: 16px;
   padding: 16px;
-  background: linear-gradient(180deg, #feadb0, #fdddd4);
+  background: linear-gradient(180deg, #f9ecec, #fdddd4);
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   min-height: 100vh;
 }
 
-.username {
-  margin-left: 24px;
-  font-size: 16px;
-  color: #666;
-}
+
 
 /* 整个块的样式 */
 .section {

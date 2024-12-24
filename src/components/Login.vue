@@ -2,7 +2,11 @@
     <div class="login-page">
       <div class="login-container">
         <van-nav-bar title="登录" :border="false" style="margin-bottom: 10px;" />
-  
+        
+        <van-overlay v-model:show="isLogin" z-index="2000">
+            <van-loading color="#1989fa" size="30px" type="spinner" vertical>登录中...</van-loading>
+        </van-overlay>
+
         <van-form @submit="login">
           <!-- 邮箱 -->
           <van-field
@@ -37,21 +41,35 @@
           </div>
         </van-form>
   
-        <!-- 注册提示 -->
-        <p class="footer-text">
+        
+
+        <van-divider content-position="center" style="margin: 30px;">或</van-divider>
+        <van-button
+  type="primary"
+  round
+  block
+  @click="loginWithGoogle"
+  class="google-login-button"
+>
+<div class="google-content">
+<img src="@/assets/google-logo.svg" alt="Google Logo" class="google-logo" />
+  使用 Google 登录
+</div>
+</van-button>
+<!-- 注册提示 -->
+<p class="footer-text">
           没有账号？
           <span @click="toRegister" class="link">立即注册</span>
         </p>
-
-        
       </div>
     </div>
   </template>
   
   <script>
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebaseConfig";
+import { auth, googleProvider } from "../firebaseConfig";
 import { showDialog } from "vant";
+import { signInWithPopup } from "firebase/auth";
 
 export default {
   data() {
@@ -59,13 +77,40 @@ export default {
       email: "",
       password: "",
       showPassword: false,
+      isLogin: false,
     };
   },
   methods: {
+    // Google登录方法
+    async loginWithGoogle() {
+    try {
+      // 调用 Firebase 的 Google 登录
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // 打印用户信息（可移除）
+      console.log("Google 登录成功：", user);
+
+      // 更新 Vuex 用户状态
+      this.$store.commit("auth/setUser", {
+        uid: user.uid,
+        displayName: user.displayName || "用户",
+        email: user.email,
+        photoURL: user.photoURL, // 用户头像
+      });
+
+      // 通知父组件登录成功，关闭 Popup
+      this.$emit("loginSuccess");
+    } catch (error) {
+      console.error("Google 登录失败：", error.message);
+      showDialog({ message: "Google 登录失败，请重试。" });
+    }
+  },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword; // 切换密码显示状态
     },
     async login() {
+        this.isLogin = true;
       try {
         const userCredential = await signInWithEmailAndPassword(auth, this.email, this.password);
         const user = userCredential.user;
@@ -73,6 +118,7 @@ export default {
           uid: user.uid,
           displayName: user.displayName || "用户",
           email: user.email,
+          photoURL: user.photoURL || "https://via.placeholder.com/80",
         });
         console.log("登录成功", userCredential.user);
         this.$emit("loginSuccess");
@@ -86,6 +132,8 @@ export default {
         } else {
           showDialog({ message: '登录失败，请重试。' });
         }
+      } finally {
+        this.isLogin = false;
       }
     },
     toRegister() {
@@ -130,5 +178,29 @@ export default {
   color: #409eff;
   font-size: 14px; /* 链接字体稍大 */
   cursor: pointer;
+}
+.google-login-button {
+  /* margin-top: 20px;  */
+  background-color: #e7e7e7; /* Google 蓝色 */
+  color: #4e4e4e; /* 白色文字 */
+  border: none;
+  font-weight: bold;
+}
+
+.google-content {
+  display: flex; /* 内部内容使用 flexbox 布局 */
+  align-items: center; /* 图标和文字垂直对齐 */
+  gap: 8px; /* 图标和文字的水平间距 */
+}
+
+.google-logo {
+  width: 20px;
+  height: 20px;
+}
+
+.van-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
