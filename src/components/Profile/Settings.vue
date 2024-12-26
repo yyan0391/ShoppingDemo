@@ -1,15 +1,15 @@
 <template>
   <div class="setting">
     <van-nav-bar title="设置" left-text="返回" left-arrow @click-left="goBack" class="custom-title"></van-nav-bar>
-    <van-divider :style="{ color: '#0c0c0c', borderColor: '#0c0c0c', padding: '0 16px' }">
+    <van-divider >
       账号设置
     </van-divider>
     <van-cell-group inset>
-      <van-cell title="个人信息" is-link />
+      <van-cell title="修改个人信息" is-link @click="goEditInfo" />
       <van-cell title="支付设置" arrow />
     </van-cell-group>
 
-    <van-divider :style="{ color: '#0c0c0c', borderColor: '#0c0c0c', padding: '0 16px' }">
+    <van-divider>
       消息通知
     </van-divider>
 
@@ -37,7 +37,7 @@
 
     </van-cell-group>
 
-    <van-divider :style="{ color: '#0c0c0c', borderColor: '#0c0c0c', padding: '0 16px' }">
+    <van-divider >
       通用
     </van-divider>
 
@@ -77,6 +77,9 @@ export default {
     goBack() {
       this.$router.go(-1);
     },
+    goEditInfo() {
+      this.$router.push({ path: "/EditInfo" });
+    },
 
     async handleLogout() {
       try {
@@ -88,6 +91,7 @@ export default {
           // 调用 Firebase 的退出登录方法
           await signOut(auth);
           this.$store.commit("auth/clearUser"); // 清除 Vuex 用户状态
+          this.$store.commit("cart/logout"); // 清除购物车
           showSuccessToast("退出登录成功");
           this.$router.push({ path: "/Profile" }); // 跳转到 Profile 页面
         }
@@ -109,7 +113,7 @@ export default {
 
 <style>
 .setting {
-  background-color: #f5f5f5;
+  background-color: #f7f5f5;
   min-height: 100vh;
 }
 </style>

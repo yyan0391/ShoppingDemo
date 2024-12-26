@@ -4,7 +4,7 @@
         <van-divider :style="{ color: '#0c0c0c', borderColor: '#0c0c0c', padding: '0 16px' }">
             消息通知
         </van-divider>
-        <van-cell-group inset>
+        <van-cell-group>
             <van-cell center title="允许通知">
                 <template #right-icon>
                     <van-switch v-model="checked" />

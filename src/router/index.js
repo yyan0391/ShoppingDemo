@@ -1,15 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Cart from '@/components/Cart.vue'
-import GoodDetail from '@/components/GoodDetail.vue';
+import Cart from '@/components/Cart/Cart.vue'
+import GoodDetail from '@/components/Home/GoodDetail.vue';
 import MainPage from '@/components/MainPage.vue'
-import Profile from '@/components/Profile.vue'
+import Profile from '@/components/Profile/Profile.vue'
 import Login from '@/components/Login.vue';
-import Home from '@/components/Home.vue';
-import CheckOut from '@/components/CheckOut.vue';
-import Address from '@/components/Address.vue';
+import Home from '@/components/Home/Home.vue';
+import CheckOut from '@/components/Cart/CheckOut.vue';
+import Address from '@/components/Cart/Address.vue';
 import Register from '@/components/Register.vue';
-import Settings from '@/components/Settings.vue';
-import Notification from '@/components/Notification.vue';
+import Settings from '@/components/Profile/Settings.vue';
+import Notification from '@/components/Profile/Notification.vue';
+import EditInfo from '@/components/Admin/EditInfo.vue';
+import AdminUploadGoods from '@/components/Admin/AdminUploadGoods.vue';
+import AdminEditGoods from '@/components/Admin/AdminEditGoods.vue';
 
 const routes = [
     {
@@ -62,6 +65,24 @@ const routes = [
     {
         path: '/Notification',
         component: Notification,
+        meta: { showNavbar: false },
+        props: true,
+    },
+    {
+        path: '/EditInfo',
+        component: EditInfo,
+        meta: { showNavbar: false },
+        props: true,
+    },
+    {
+        path: '/AdminUploadGoods',
+        component: AdminUploadGoods,
+        meta: { showNavbar: false },
+        props: true,
+    },
+    {
+        path: '/AdminEditGoods',
+        component: AdminEditGoods,
         meta: { showNavbar: false },
         props: true,
     },

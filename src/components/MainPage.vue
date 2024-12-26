@@ -7,11 +7,7 @@
         <van-tabbar-item :icon="this.active == 2 ? 'user' : 'user-o'" to="/profile">我的</van-tabbar-item>
         
     </van-tabbar>
-    <!-- <div class="content">
-        <Home v-if="active === 0"></Home>
-        <Cart v-if="active === 1"></Cart>
-        <Profile v-if="active === 2"></Profile>
-    </div> -->
+
     <div class="content">
             <router-view></router-view>
         </div>
@@ -19,15 +15,23 @@
 </template>
 
 <script>
-import Cart from '@/components/Cart.vue' 
-import Profile from '@/components/Profile.vue'
+import Cart from '@/components/Cart/Cart.vue' 
+import Profile from '@/components/Profile/Profile.vue'
+import { mapState, mapMutations, mapGetters } from "vuex";
 
 
 export default {
     name: 'mainpage',
     computed: {
+        ...mapGetters("auth", ["uid", "isLogin"]),
         cartCounter() {  
-            return this.$store.state.cartCounter;
+            if (this.isLogin){
+                console.log('购物车数量：'+this.$store.state.cartCounter);
+                return this.$store.state.cartCounter;
+            } else {
+                return 0;
+            }
+            
         },
     },
     components: {

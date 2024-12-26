@@ -1,8 +1,18 @@
 <script>
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/firebaseConfig";
+
 export default {
-  components: {
-    
-  }
+  created() {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        this.$store.commit("auth/setUser", user);
+        await this.$store.commit("initializeCart"); // 初始化购物车
+      } else {
+        this.$store.commit("auth/clearUser");
+      }
+    });
+  },
 }
 </script>
 

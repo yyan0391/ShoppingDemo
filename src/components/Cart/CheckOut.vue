@@ -13,7 +13,6 @@
                 <template #label>
                     <span style="font-weight: bold;">{{ address ? address.address : '' }}</span>
                 </template>
-
             </van-cell>
         </van-cell-group>
 
@@ -158,7 +157,7 @@ export default {
             showConfirmDialog({
         title: '确定返回吗？',
         message:
-          '返回后，当前选择的配送方式和优惠券将不被保存，需重新选择。',
+          '返回后，当前选择将不被保存。',
         confirmButtonText: '返回',
         cancelButtonText: '再想想',
       })

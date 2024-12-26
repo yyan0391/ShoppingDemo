@@ -240,11 +240,8 @@ export default {
 <style scoped>
 .register-page {
     height: 100vh;
-    /* 占满整个屏幕 */
     display: flex;
     flex-direction: column;
-    /* justify-content: center; */
-    /* align-items: center; */
     padding: 30px;
 }
 

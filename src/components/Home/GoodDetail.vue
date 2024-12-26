@@ -1,8 +1,16 @@
 <template>
     <div>
         <van-nav-bar title="商品详情" left-text="返回" left-arrow @click-left="goBack" class="custom-title"></van-nav-bar>
-        <van-row>
+        <!-- <van-row>
             <img :src="items.image" alt="商品图片" class="product-image" />
+        </van-row> -->
+
+        <van-row class="photo-row">
+            <van-swipe :autoplay="3000" lazy-render>
+                <van-swipe-item v-for="(image, index) in items.images" :key="index">
+                    <img :src="image" alt="商品图片" class="product-image" />
+                </van-swipe-item>
+            </van-swipe>
         </van-row>
 
 
@@ -55,7 +63,7 @@
 
         <footer class="gd-footer">
             <van-action-bar>
-                <van-action-bar-icon icon="chat-o" text="客服" color="#ee0a24" />
+                <van-action-bar-icon icon="service-o" text="客服" color="#ee0a24" />
                 <van-action-bar-icon icon="cart-o" :badge="cartCounter" @click="GoToCart" >购物车
                     <!-- <template #badge>
                         <span v-show="cartCounter > 0">{{ cartCounter }}</span>
@@ -99,7 +107,7 @@ export default {
             let isInCart = this.items.isInCart;
             
             if (isInCart) {
-                this.$store.commit('addGoods', this.items.id);
+                this.$store.commit('addGoodsToCart', this.items.id);
                 showSuccessToast('添加购物车成功');
             } else {
                 this.$store.commit('addGoodsToCart', this.items);
@@ -146,16 +154,21 @@ export default {
     }
 }
 
+.photo-row {
+   min-height: 400px;
+   justify-content: center; /* 水平居中 */
+   align-items: center; /* 垂直居中 */
+}
+
 .product-image {
     width: 100%;
-    height: 400px;
+    height: auto;
     object-fit: cover;
 }
 
 .cell-content {
     margin: 10px;
     background: #fff;
-    /* border-radius: 8px; */
     padding: 10px;
 
 }
