@@ -53,6 +53,7 @@ import product5 from '@/assets/imgs/IMG_1013.png';
 import product6 from '@/assets/imgs/IMG_1014.png';
 import product7 from '@/assets/imgs/IMG_1015.png';
 import product8 from '@/assets/imgs/IMG_1016.png';
+import product9 from '@/assets/imgs/乳品.png';
 import { showSuccessToast, showFailToast } from 'vant';
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
@@ -101,7 +102,9 @@ export default {
                     id: doc.id, // 商品 ID
                     ...doc.data(), // 商品数据
                 }));
-                this.products = fetchedProducts.map((product) => ({
+                this.products = fetchedProducts
+                .filter((product) => product.isAvailable)
+                .map((product) => ({
                     ...product,
                     images: product.images && product.images.length ? product.images : ["https://via.placeholder.com/150"], // 确保至少有一张默认图片
                 }));

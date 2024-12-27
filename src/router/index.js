@@ -13,6 +13,8 @@ import Notification from '@/components/Profile/Notification.vue';
 import EditInfo from '@/components/Admin/EditInfo.vue';
 import AdminUploadGoods from '@/components/Admin/AdminUploadGoods.vue';
 import AdminEditGoods from '@/components/Admin/AdminEditGoods.vue';
+import AdminCoupon from '@/components/Admin/AdminCoupon.vue';
+
 
 const routes = [
     {
@@ -83,6 +85,12 @@ const routes = [
     {
         path: '/AdminEditGoods',
         component: AdminEditGoods,
+        meta: { showNavbar: false },
+        props: true,
+    },
+    {
+        path: '/AdminCoupon',
+        component: AdminCoupon,
         meta: { showNavbar: false },
         props: true,
     },

@@ -18,6 +18,24 @@ export default createStore({
     };
   },
   mutations: {
+    async refreshCart(state) {
+      const userId = state.auth?.user?.uid;
+      if (!userId) {
+        console.error("未登录，无法加载购物车");
+        return;
+      }
+  
+      const cartRef = doc(db, "cart", userId);
+      const docSnap = await getDoc(cartRef);
+  
+      if (docSnap.exists()) {
+        state.cartGoods = docSnap.data().items;
+        state.cartCounter = state.cartGoods.reduce((sum, item) => sum + item.count, 0);
+      } else {
+        state.cartGoods = [];
+        state.cartCounter = 0;
+      }
+    },
     // 添加商品到购物车
     async addGoodsToCart(state, item) {
       const userId = state.auth?.user?.uid;

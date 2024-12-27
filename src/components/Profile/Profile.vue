@@ -100,6 +100,11 @@
             <van-icon name="edit" class="cell-icon" />
           </template>
         </van-cell>
+        <van-cell title="优惠券设置" is-link @click="handleAdminCoupon">
+          <template #icon>
+            <van-icon name="coupon-o" class="cell-icon" />
+          </template>
+        </van-cell>
       </van-cell-group>
     </div>
 
@@ -217,6 +222,9 @@ export default {
     handleAdminEditGoods() {
       this.$router.push({ path: "/AdminEditGoods" });
     },
+    handleAdminCoupon() {
+      this.$router.push({ path: "/AdminCoupon" });
+    },
     handleAbout() {
       showDialog({
         title: '欢迎来到【RIIZE-B】！',
@@ -225,6 +233,7 @@ export default {
     `,
     allowHtml: true,
       })
+
       
     },
     handleContact() {

@@ -1,6 +1,7 @@
 <template>
   <div style="background-color: beige; min-height: 100vh;">
     <van-nav-bar title="上传商品" left-arrow @click-left="$router.go(-1)" :border="false" />
+    
     <div class="upload-page">
       <van-overlay v-model:show="isUploading" z-index="2000">
         <van-loading size="30px" type="spinner" vertical>上传中...</van-loading>
@@ -12,20 +13,20 @@
         <!-- 商品描述 -->
         <van-field v-model="product.description" label="商品描述" placeholder="请输入商品描述" required rows="3" type="textarea" />
         <!-- 商品价格 -->
-        <van-field v-model="product.price" label="商品价格" required>
+        <van-field v-model="product.price" label="商品价格（¥）" required>
           <template #input>
             <van-stepper v-model="product.price" />
           </template>
         </van-field>
 
-        <van-field v-model="product.quantity" label="商品库存" required>
+        <van-field v-model="product.quantity" label="商品库存（个）" required>
           <template #input>
             <van-stepper v-model="product.quantity" />
           </template>
         </van-field>
 
         <!-- 商品标签 -->
-        <van-field v-model="product.tag" label="标签">
+        <van-field v-model="product.tag" label="标签" required>
           <template #input>
             <van-radio-group v-model="product.tag" direction="horizontal">
               <van-radio name="热销">热销</van-radio>
@@ -36,10 +37,26 @@
         </van-field>
 
         <!-- 商品图片 -->
-        <van-field label="商品图片">
+        <van-field label="商品图片" required>
           <template #input>
-            <van-uploader v-model="imageFiles" multiple max-count="5" :after-read="handleImageRead"
+            <van-uploader 
+              v-model="imageFiles" 
+              multiple 
+              max-count="5" 
+              :after-read="handleImageRead"
               @oversize="handleOversize" />
+          </template>
+        </van-field>
+
+        <!-- 商品详情图片 -->
+        <van-field label="商品详情图片" required>
+          <template #input>
+            <van-uploader 
+              v-model="detailImageFiles" 
+              multiple 
+              max-count="10" 
+              :after-read="handleDetailImageRead"
+              @oversize="handleDetailOversize" />
           </template>
         </van-field>
 
@@ -71,11 +88,14 @@ export default {
         quantity: 0,
         tag: "热销",
         images: [],
+        productDetailImages: [], 
         isInCart: false,
         count: 0,
         isInCheck: false,
+        isAvailable: true, // 商品默认上架
       },
       imageFiles: [], // 上传的图片文件数组
+      detailImageFiles: [],
       isUploading: false,
     };
   },
@@ -92,18 +112,37 @@ export default {
       }
       this.imageFiles.push(file.file);
     },
+    handleDetailImageRead(file) {
+      const allowedFormats = ["image/jpeg", "image/png", "image/gif"];
+      if (!allowedFormats.includes(file.type)) {
+        showToast("只支持 JPG、PNG 或 GIF 格式的图片");
+        return false;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        showToast("文件大小不能超过 2MB");
+        return false;
+      }
+      this.detailImageFiles.push(file.file); // 新增：处理详情图片
+    },
+    handleDetailOversize() {
+      showToast("最多上传 10 张详情图片"); // 新增：处理详情图片超出数量
+    },
     handleOversize() {
       showToast("最多上传 5 张图片");
     },
+    
     async handleUpload() {
-      if (!this.product.title || !this.product.description || !this.product.price || !this.product.quantity) {
+      if (!this.product.title || !this.product.description || !this.product.price || !this.product.quantity || this.imageFiles.length === 0 || this.detailImageFiles.length === 0) {
         showToast("请填写完整商品信息");
         return;
       }
 
       const productId = uuidv4(); // 自动生成商品 ID
       const imageUrls = [];
-this.isUploading = true;
+      const detailImageUrls = [];
+
+      this.isUploading = true;
+
       try {
         // 遍历上传图片
         for (let i = 0; i < this.imageFiles.length; i++) {
@@ -121,6 +160,18 @@ this.isUploading = true;
           console.log("图片上传成功，下载链接：", imageUrl);
           imageUrls.push(imageUrl);
         }
+        
+         // 上传商品详情图片
+         for (let i = 0; i < this.detailImageFiles.length; i++) {
+          const file = this.detailImageFiles[i].file;
+          const fileRef = ref(storage, `products/${productId}_detail_${i}`);
+          // const metadata = {
+          //   contentType: file.type, // 设置 MIME 类型
+          // };
+          await uploadBytesResumable(fileRef, file);
+          const detailImageUrl = await getDownloadURL(fileRef);
+          detailImageUrls.push(detailImageUrl);
+        }
 
         // 保存商品信息到 Firestore
         const productData = {
@@ -131,10 +182,12 @@ this.isUploading = true;
           quantity: parseInt(this.product.quantity),
           tag: this.product.tag,
           images: imageUrls,
+          productDetailImages: detailImageUrls,
           isInCart: false,
           count: 0,
           isInCheck: false,
           createdAt: new Date(),
+          isAvailable: true, // 商品默认上架
         };
 
         await setDoc(doc(db, "products", productId), productData);

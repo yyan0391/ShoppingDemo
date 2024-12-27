@@ -1,11 +1,11 @@
 <template>
   <div>
-    <van-nav-bar title="我的购物车" @click-left="goBack" class="custom-title">
+    <van-nav-bar title="我的购物车" @click-left="goBack" class="fix-custom-title">
       <template #right>
         <span @click="CartManage">管理</span>
       </template>
     </van-nav-bar>
-
+<div class="cart-content">
     <!-- 空购物车提示 -->
     <van-empty v-if="!isLogin || cartGoods.length === 0" description="你还没有添加任何商品哦~">
       <van-button
@@ -19,7 +19,7 @@
     </van-empty>
 
     <!-- 商品列表 -->
-    <van-row v-else v-for="item in cartGoods" :key="item.id" class="cart-item">
+    <van-row v-else v-for="item in availableGoods" :key="item.id" class="cart-item">
       <van-col span="3">
         <van-checkbox
           :model-value="checkGoods.some((checkItem) => checkItem.id === item.id)"
@@ -56,10 +56,27 @@
 
     <van-popup v-model:show="showLogin" style="border-radius: 24px;" closeable close-icon="cross"
             close-icon-position="top-right">
-            <Login @loginSuccess="handleLoginSuccess"  />
-      </van-popup>
+        <Login @loginSuccess="handleLoginSuccess"  />
+    </van-popup>
 
+    <!-- 分隔线 -->
+    <van-divider v-if="unavailableGoods.length > 0">已下架商品</van-divider>
 
+    <!-- 下架商品列表 -->
+    <div v-if="unavailableGoods.length > 0">
+      <van-row v-for="item in unavailableGoods" :key="item.id" class="cart-item cart-item-disabled">
+        <van-col span="24">
+          <van-card :title="item.title" :thumb="item.images[0]" :desc="item.description"
+            :price="item.price * item.count" is-link >
+            <template #tags>
+              <van-tag type="danger">已下架</van-tag>
+            </template>
+          </van-card>
+        </van-col>
+      </van-row>
+    </div>
+
+</div>
 
     <!-- 底部提交栏 -->
     <footer class="dp-footer">
@@ -71,7 +88,7 @@
         @submit="onClickCheckOut"
       >
         <van-checkbox :model-value="isAllChecked" @update:model-value="toggleAllCheck">全选</van-checkbox>
-        <template #tip> 已选择 {{ checkCounter }} 件商品 </template>
+        <template #tip> 已选择 {{checkCounter}} 件商品 </template>
       </van-submit-bar>
     </footer>
   </div>
@@ -96,6 +113,7 @@ export default {
   components: {
     Login,
   },
+  
   computed: {
     ...mapState(["cartGoods", "checkGoods", "checkCounter"]),
     ...mapGetters("auth", ["uid", "isLogin"]),
@@ -108,6 +126,15 @@ export default {
         this.cartGoods.every((item) => this.checkGoods.some((checkItem) => checkItem.id === item.id))
       );
     },
+    // 上架商品
+    availableGoods() {
+console.log(this.cartGoods)
+      return this.cartGoods.filter((item) => item.isAvailable);
+    },
+    // 下架商品
+    unavailableGoods() {
+      return this.cartGoods.filter((item) => !item.isAvailable);
+    },
   },
   methods: {
     ...mapMutations([
@@ -115,6 +142,7 @@ export default {
       "removeGoodsFromCheck",
       "deleteGoodsFromCart",
       "updateGoodsQuantity",
+      "refreshCartGoods",
     ]),
     onCheckChange(item, checked) {
       if (checked) {
@@ -161,6 +189,7 @@ export default {
           try{
           await updateDoc(cartRef, { items: updatedItems });
           this.deleteGoodsFromCart(item.id);
+          await this.refreshCart();
           }catch(error){
             console.log(error)
           } finally {
@@ -206,6 +235,7 @@ export default {
 
 
 <style>
+
 .cart-item {
   display: flex;
   align-items: center;
@@ -235,6 +265,22 @@ export default {
     width: 100%;
     z-index: 1;
   }
+}
+.cart-item-disabled {
+  opacity: 0.5;
+  pointer-events: none; /* 禁止交互 */
+}
+
+.cart-content {
+  padding-bottom: 100px;
+  padding-top: 50px;
+}
+
+.fix-custom-title {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100%;
 }
 
 </style>

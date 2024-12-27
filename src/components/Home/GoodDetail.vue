@@ -1,15 +1,17 @@
 <template>
     <div>
         <van-nav-bar title="商品详情" left-text="返回" left-arrow @click-left="goBack" class="custom-title"></van-nav-bar>
-        <!-- <van-row>
-            <img :src="items.image" alt="商品图片" class="product-image" />
-        </van-row> -->
 
-        <van-row class="photo-row">
-            <van-swipe :autoplay="3000" lazy-render>
-                <van-swipe-item v-for="(image, index) in items.images" :key="index">
-                    <img :src="image" alt="商品图片" class="product-image" />
+        <van-row >
+            <van-swipe ref="swipe" :autoplay="3000" class="" >
+                <van-swipe-item v-for="image in images" :key="image" class="detail-images">
+                    <van-image :src="image" class="product-image"  fit="cover" width="100%"
+                    height="100%" />
                 </van-swipe-item>
+
+
+
+                
             </van-swipe>
         </van-row>
 
@@ -58,16 +60,23 @@
             </template>
         </van-cell>
 
+        <!-- 商品详情图片展示 -->
+        <van-divider>商品详情</van-divider>
+        <van-row class="detail-images">
+            <img v-for="(image, index) in items.productDetailImages" :key="index" :src="image" class="detail-image" />
+        </van-row>
+
+
+        <van-divider class="footer">没有更多了</van-divider>
+
 
 
 
         <footer class="gd-footer">
             <van-action-bar>
                 <van-action-bar-icon icon="service-o" text="客服" color="#ee0a24" />
-                <van-action-bar-icon icon="cart-o" :badge="cartCounter" @click="GoToCart" >购物车
-                    <!-- <template #badge>
-                        <span v-show="cartCounter > 0">{{ cartCounter }}</span>
-                    </template> -->
+                <van-action-bar-icon icon="cart-o" :badge="cartCounter" @click="GoToCart">购物车
+
                 </van-action-bar-icon>
                 <van-action-bar-icon icon="star" text="收藏" color="#ff5000" />
                 <van-action-bar-button type="warning" @click="addGoodsToCart" text="加入购物车" />
@@ -81,6 +90,7 @@
 
 <script>
 import { showSuccessToast, showFailToast } from 'vant';
+import { nextTick } from 'vue';
 
 export default {
     name: "GoodDetail",
@@ -88,9 +98,13 @@ export default {
         return {
             value: 3,
             items: JSON.parse(this.$route.query.items || '[]'),
+            images: [],
         };
     },
     computed: {
+        images() {
+            return this.items.images;
+        },
         cartCounter() {
             return this.$store.state.cartCounter;
         },
@@ -98,14 +112,25 @@ export default {
             return this.$route.query;
         }
     },
-   
+    mounted() {
+        this.refreshSwipe();
+    },
+
     methods: {
+        refreshSwipe() {
+            nextTick(() => {
+                const swipeInstance = this.$refs.swipe;
+                if (swipeInstance && swipeInstance.update) {
+                    swipeInstance.update(); // 重新计算滑动区域
+                }
+            });
+        },
         goBack() {
             this.$router.go(-1);
         },
         addGoodsToCart() {
             let isInCart = this.items.isInCart;
-            
+
             if (isInCart) {
                 this.$store.commit('addGoodsToCart', this.items.id);
                 showSuccessToast('添加购物车成功');
@@ -155,15 +180,27 @@ export default {
 }
 
 .photo-row {
-   min-height: 400px;
-   justify-content: center; /* 水平居中 */
-   align-items: center; /* 垂直居中 */
+    height: auto;
+    width: 100%;
+    /* position: relative; */
+}
+
+.van-swipe {
+    height: 100%;
+}
+
+.van-swipe-item {
+  width: 100%; 
+  height: 100%;
+  justify-content: center;
+  align-items: center;
 }
 
 .product-image {
     width: 100%;
     height: auto;
     object-fit: cover;
+    justify-content: center;
 }
 
 .cell-content {
@@ -176,5 +213,29 @@ export default {
 .logistics-icon {
     font-size: 16px;
     line-height: inherit;
+}
+
+.detail-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+}
+
+.detail-image {
+    width: 100%;
+    height: auto;
+}
+
+.footer {
+    text-align: center;
+    color: #999;
+    /* 浅灰色文字 */
+    font-size: 14px;
+    padding: 10px 0;
+    margin-top: auto;
+    /* 将底部标注固定在页面底部 */
+    line-height: 2;
+    border-top: 1px solid #e0e0e0;
 }
 </style>

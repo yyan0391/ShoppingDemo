@@ -17,7 +17,7 @@
         </van-cell-group>
 
         <van-card-group>
-            <van-card v-for="item in cartGoods" :key="item.id" :title="item.title" :thumb="item.image"
+            <van-card v-for="item in cartGoods" :key="item.id" :title="item.title" :thumb="item.images[0]"
                 :desc="item.description" :price="item.price * item.count" :num="item.count" class="card">
 
                 <template #tags>
