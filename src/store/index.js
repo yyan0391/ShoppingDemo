@@ -15,6 +15,7 @@ export default createStore({
       checkGoods: [], // 已选中商品
       checkCounter: 0, // 已选中商品数量
       selectedAddress: null, // 选中的地址
+      favorites: [], // 收藏夹
     };
   },
   mutations: {

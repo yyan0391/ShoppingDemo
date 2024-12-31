@@ -5,6 +5,9 @@
             <van-loading size="30px" type="spinner" color="#1989fa" />
         </van-overlay>
 
+        <div class="address-list">
+        
+
         <van-empty v-if="addressList.length === 0" description="暂无收货地址" />
         <van-address-list v-model="chosenAddressId" :list="addressList" :switchable="true" @edit="onEdit"
             @add="this.showAdd = true" @select="onSelect" default-tag-text="默认地址">
@@ -37,7 +40,7 @@
             <van-address-edit :area-list="areaList" show-set-default @save="onAdd" @cancel="onCancel"
                 :area-columns-placeholder="['请选择省', '请选择市', '请选择区']" />
         </van-popup>
-
+        </div>
 
 
     </div>
@@ -307,6 +310,9 @@ export default {
     background-color: #efefef;
 }
 
+.address-list {
+    margin-top: 40px;
+}
 .van-overlay {
     display: flex;
     justify-content: center;

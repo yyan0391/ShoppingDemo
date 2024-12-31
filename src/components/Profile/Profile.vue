@@ -35,7 +35,7 @@
           </van-col>
           <van-col span="8" @click="handleFavorite">
             <van-icon name="star-o" />
-            <p>我的收藏</p>
+            <p>收藏夹</p>
           </van-col>
           <van-col span="8" @click="handleAddress">
             <van-icon name="location-o" />
@@ -43,7 +43,7 @@
           </van-col>
         </van-row>
 
-        <van-row class="profile-row">
+        <!-- <van-row class="profile-row">
           <van-col span="8" @click="handleCoupon">
             <van-icon name="coupon-o" />
             <p>优惠券</p>
@@ -56,7 +56,7 @@
             <van-icon name="clock-o" />
             <p>浏览历史</p>
           </van-col>
-        </van-row>
+        </van-row> -->
       </div>
 
       <!-- 设置 -->
@@ -85,22 +85,22 @@
 
 
       <div v-if="userRole === 'admin'">
-        <van-divider :style="{ color: '#1989fa', borderColor: '#1989fa', padding: '0 16px' }">
+        <van-divider :style="{ color: 'white', borderColor: 'white', padding: '0 16px', fontWeight: 'bold'}">
           管理员功能
         </van-divider>
       <van-cell-group  inset
-        style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); padding: 10px; margin-top: 20px;">
-        <van-cell title="上传商品" is-link @click="handleAdminUploadGoods">
+        style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);background: #fbffe3; padding: 10px; margin-top: 20px;">
+        <van-cell title="上传商品" is-link @click="handleAdminUploadGoods" style="background: #fbffe3">
           <template #icon>
             <van-icon name="gift-o" class="cell-icon" />
           </template>
         </van-cell>
-        <van-cell title="编辑商品" is-link @click="handleAdminEditGoods">
+        <van-cell title="管理商品" is-link @click="handleAdminEditGoods" style="background: #fbffe3">
           <template #icon>
             <van-icon name="edit" class="cell-icon" />
           </template>
         </van-cell>
-        <van-cell title="优惠券设置" is-link @click="handleAdminCoupon">
+        <van-cell title="优惠券设置" is-link @click="handleAdminCoupon" style="background: #fbffe3">
           <template #icon>
             <van-icon name="coupon-o" class="cell-icon" />
           </template>
@@ -109,9 +109,6 @@
     </div>
 
 
-      <!-- <van-dialog v-model:show="showDialog" title="提示" show-cancel-button>
-      请先登录。
-    </van-dialog> -->
     </div>
   </div>
 </template>
@@ -172,7 +169,7 @@ export default {
     // 我的订单
     handleOrder() {
       if (!this.isLogin) {
-        this.showDialog = true;
+        showFailToast('请先登录');
       } else {
         this.$router.push({ path: "/Profile/Orders" });
       }
@@ -180,15 +177,15 @@ export default {
     // 我的收藏
     handleFavorite() {
       if (!this.isLogin) {
-        this.showDialog = true;
+        showFailToast('请先登录');
       } else {
-        this.$router.push({ path: "/Profile/Favorites" });
+        this.$router.push({ path: "/Like" });
       }
     },
     // 我的地址
     handleAddress() {
       if (!this.isLogin) {
-        this.showDialog = true;
+        showFailToast('请先登录');
       } else {
         this.$router.push({ path: "/Address" });
       }
@@ -196,7 +193,6 @@ export default {
     // 设置
     handleSetting() {
       if (!this.isLogin) {
-        this.showDialog = true;
         showFailToast('请先登录');
       } else {
         this.$router.push({ path: "/Settings" });
@@ -301,7 +297,8 @@ export default {
   /* text-align: center; */
   margin-bottom: 16px;
   padding: 16px;
-  background: linear-gradient(180deg, #f9ecec, #fdddd4);
+  /* background: linear-gradient(180deg,#f3ffcf, #f2d680 ); */
+  background: #bac9a9;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   min-height: 100vh;
@@ -311,7 +308,7 @@ export default {
 
 /* 整个块的样式 */
 .section {
-  background: #fff;
+  background: #fbffe3;
   /* 背景为白色 */
   border-radius: 12px;
   /* 圆角 */
@@ -331,6 +328,7 @@ export default {
 .profile-row {
   text-align: center;
   margin: 15px 0;
+  background: #fbffe3;
 }
 
 .profile-row p {

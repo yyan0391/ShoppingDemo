@@ -2,16 +2,14 @@
     <header class="home-header">
       <div class="tap-menu" sticky>
         <!-- Vant 的 Tabs -->
-        <van-tabs v-model="goodsType" active="{{ active }}">
-          <van-tab title="全部" name="全部"></van-tab>
-          <van-tab title="水果" name="水果"></van-tab>
-          <van-tab title="蔬菜" name="蔬菜"></van-tab>
-          <van-tab title="肉蛋" name="肉蛋"></van-tab>
-          <van-tab title="速冻" name="速冻"></van-tab>
-          <van-tab title="酒饮" name="酒饮"></van-tab>
-          <van-tab title="乳品" name="乳品"></van-tab>
-          <van-tab title="零食" name="零食"></van-tab>
-          <van-tab title="熟食" name="熟食"></van-tab>
+        <van-tabs v-model="goodsType" active="{{ active }}" @change="onTabChange">
+          <van-tab title="ALL" name="ALL"></van-tab>
+          <van-tab title="MUSIC" name="MUSIC"></van-tab>
+          <van-tab title="PHOTO" name="PHOTO"></van-tab>
+          <van-tab title="CONCERT" name="CONCERT"></van-tab>
+          <van-tab title="LIVING" name="LIVING"></van-tab>
+          <van-tab title="STATIONARY" name="STATIONARY"></van-tab>
+          <van-tab title="FASHION" name="FASHION"></van-tab>
         </van-tabs>
       </div>
     </header>
@@ -20,25 +18,21 @@
   <script>
   export default {
     name: "home-header",
+    props: {
+      products: {
+        type: Array,
+        required: true,
+      },
+    },
     data() {
       return {
-        kindToType: {
-          全部: 0,
-          水果: 1,
-          蔬菜: 2,
-          肉蛋: 3,
-          速冻: 4,
-          酒饮: 5,
-          乳品: 6,
-          零食: 7,
-          熟食: 8,
-        },
-        goodsType: "全部",
+        goodsType: "ALL",
       };
     },
-    watch: {
-      goodsType(newType) {
-        this.$store.state.GoodsCurrentSelKind = this.kindToType[newType];
+    methods: {
+      onTabChange(tab) {
+        this.goodsType = tab.name;
+        this.$emit("filterChanged", tab);
       },
     },
   };
@@ -46,25 +40,12 @@
   
   <style>
   
-  /* .home-header {
-    position: fixed;
+  .home-header {
     left: 0;
     top: 0;
     width: 100%;
     background-color: #fff;
-    z-index: 999; */
-  
-    /* .top-text {
-        padding: 10px 0;
-        line-height: 1.5;
-    }
-  
-    .tap-menu {
-      
-      padding: 0 10px;
-    } */
-
-
-  /* } */
+    z-index: 999;
+  }
   </style>
   

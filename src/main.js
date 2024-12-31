@@ -26,6 +26,7 @@ import {
     CheckboxGroup,
     Tab, 
     Tabs,
+    Picker,
 
  } from 'vant';
 import router from './router'
@@ -84,6 +85,7 @@ app.use(showSuccessToast);
 app.use(FloatingPanel);
 app.use(Tab);
 app.use(Tabs);
+app.use(Picker);
 
 app.mount('#app');
 

@@ -1,7 +1,7 @@
 <template>
   <div style="background-color: beige; min-height: 100vh;">
     <van-nav-bar title="上传商品" left-arrow @click-left="$router.go(-1)" :border="false" />
-    
+
     <div class="upload-page">
       <van-overlay v-model:show="isUploading" z-index="2000">
         <van-loading size="30px" type="spinner" vertical>上传中...</van-loading>
@@ -24,6 +24,24 @@
             <van-stepper v-model="product.quantity" />
           </template>
         </van-field>
+
+        <van-field
+          v-model="selectedCategoryText"
+          is-link
+          readonly
+          required
+          label="商品类别"
+          placeholder="选择商品类别"
+          @click="showPicker = true"
+        />
+        <van-popup v-model:show="showPicker" destroy-on-close round position="bottom">
+          <van-picker
+            title="选择商品类别"
+            :columns="categories"
+            @cancel="showPicker = false"
+            @confirm="onConfirmCategory"
+          />
+        </van-popup>
 
         <!-- 商品标签 -->
         <van-field v-model="product.tag" label="标签" required>
@@ -88,18 +106,36 @@ export default {
         quantity: 0,
         tag: "热销",
         images: [],
+        category: "",
         productDetailImages: [], 
         isInCart: false,
         count: 0,
         isInCheck: false,
         isAvailable: true, // 商品默认上架
       },
+      categories: [
+        { text: "MUSIC", value: "MUSIC" },
+        { text: "PHOTO", value: "PHOTO" },
+        { text: "CONCERT", value: "CONCERT" },
+        { text: "LIVING", value: "LIVING" },
+        { text: "STATIONARY", value: "STATIONARY" },
+        { text: "FASHION", value: "FASHION" },
+      ],
+      selectedCategoryText: "", // 用户选择的类别文本
+      selectedCategoryValue: "", // 用户选择的类别值
+      showPicker: false, // 是否显示 Picker 弹窗
       imageFiles: [], // 上传的图片文件数组
       detailImageFiles: [],
       isUploading: false,
     };
   },
   methods: {
+    onConfirmCategory(option) {
+      console.log("用户选择的类别：", option);
+      this.selectedCategoryText = option.selectedOptions[0].text; // 显示的类别文本
+      this.selectedCategoryValue = option.selectedOptions[0].value; // 存储的类别值
+      this.showPicker = false; // 关闭弹窗
+    },
     handleImageRead(file) {
       const allowedFormats = ["image/jpeg", "image/png", "image/gif"];
       if (!allowedFormats.includes(file.type)) {
@@ -182,6 +218,7 @@ export default {
           quantity: parseInt(this.product.quantity),
           tag: this.product.tag,
           images: imageUrls,
+          category: this.selectedCategoryValue,
           productDetailImages: detailImageUrls,
           isInCart: false,
           count: 0,

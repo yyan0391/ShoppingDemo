@@ -4,7 +4,7 @@
         </van-nav-bar>
 
         <van-divider />
-
+<div class="address-container">
         <van-cell-group inset class="address-cell">
             <van-cell icon="location-o" value="所有地址" is-link @click="GoToAddress">
                 <template #title>
@@ -45,7 +45,7 @@
                 @change="onChange" @exchange="onExchange" />
         </van-popup>
 
-
+    </div>
 
 
         <footer class="co-footer">
@@ -275,6 +275,12 @@ export default {
     background: #eee;
     min-height: 90vh;
     color: #fff;
+}
+
+.address-container {
+    margin-top: 30px;
+    padding: 10px;
+    
 }
 
 .address-cell {

@@ -11,7 +11,7 @@
           <div class="avatar-uploader">
             <van-row justify="center">
               <van-col span="6">
-                <span class="required-star">*</span>
+                
                 <span class="required-text">修改头像</span>
               </van-col>
               <van-col span="18">
@@ -22,16 +22,16 @@
           </div>
   
           <!-- 用户名 -->
-          <van-field v-model="username" name="username" label="用户名" placeholder="请输入用户名" required
+          <van-field v-model="username" name="username" label="用户名" placeholder="请输入用户名"
             class="form-field" :error-message="usernameError" @blur="() => validateUsername(true)"
             @input="() => validateUsername(false)" />
   
           <!-- 邮箱 (不可修改) -->
           <van-field v-model="email" name="email" label="邮箱" placeholder="邮箱不可修改" disabled class="form-field" />
   
-          <!-- 密码 -->
-          <van-field v-model="password" name="password" label="新密码" placeholder="请输入新密码"
-            :type="showPassword ? 'text' : 'password'" type="password" required class="form-field"
+          
+          <!-- <van-field v-model="password" name="password" label="新密码" placeholder="请输入新密码"
+            :type="showPassword ? 'text' : 'password'" type="password" class="form-field"
             :error-message="passwordError" @blur="() => validatePassword(true)"
             @input="() => validatePassword(false)">
             <template #right-icon>
@@ -39,16 +39,16 @@
             </template>
           </van-field>
   
-          <!-- 确认密码 -->
+          
           <van-field v-model="confirmPassword" name="confirm-password" label="确认新密码" placeholder="请再次输入新密码"
-            :type="showPasswordCon ? 'text' : 'password'" type="password" required class="form-field"
+            :type="showPasswordCon ? 'text' : 'password'" type="password" class="form-field"
             :error-message="confirmPasswordError" @blur="() => validateConfirmPassword(true)"
             @input="() => validateConfirmPassword(false)">
             <template #right-icon>
               <van-icon :name="showPasswordCon ? 'eye-o' : 'eye'"
                 @click="showPasswordCon = !showPasswordCon" />
             </template>
-          </van-field>
+          </van-field> -->
   
           <!-- 修改按钮 -->
           <div class="button-container">
@@ -71,11 +71,11 @@
       return {
         username: "",
         email: "",
-        password: "",
-        confirmPassword: "",
+        // password: "",
+        // confirmPassword: "",
         usernameError: "",
-        passwordError: "",
-        confirmPasswordError: "",
+        // passwordError: "",
+        // confirmPasswordError: "",
         avatarFile: [],
         showPassword: false,
         showPasswordCon: false,
@@ -92,9 +92,9 @@
       }
     },
     methods: {
-      togglePasswordVisibility() {
-        this.showPassword = !this.showPassword;
-      },
+      // togglePasswordVisibility() {
+      //   this.showPassword = !this.showPassword;
+      // },
       async validateUsername(isFinalCheck) {
         this.username = this.username.trim();
         if (!this.username) {
@@ -113,39 +113,36 @@
         this.usernameError = "";
         return true;
       },
-      validatePassword(isFinalCheck) {
-        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-        if (!passwordPattern.test(this.password)) {
-          this.passwordError = isFinalCheck
-            ? "密码至少包含8个字符，包括大小写字母和数字"
-            : "";
-          return false;
-        }
-        // if (this.password === this.currentPassword) {
-        //   this.passwordError = isFinalCheck ? "新密码不能与当前密码相同" : "";
-        //   return false;
-        // }
-        this.passwordError = "";
-        return true;
-      },
-      validateConfirmPassword(isFinalCheck) {
-        if (this.password !== this.confirmPassword) {
-          this.confirmPasswordError = isFinalCheck
-            ? "两次输入的密码不一致"
-            : "";
-          return false;
-        }
-        this.confirmPasswordError = "";
-        return true;
-      },
+      // validatePassword(isFinalCheck) {
+      //   const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+      //   if (!passwordPattern.test(this.password)) {
+      //     this.passwordError = isFinalCheck
+      //       ? "密码至少包含8个字符，包括大小写字母和数字"
+      //       : "";
+      //     return false;
+      //   }
+        
+      //   this.passwordError = "";
+      //   return true;
+      // },
+      // validateConfirmPassword(isFinalCheck) {
+      //   if (this.password !== this.confirmPassword) {
+      //     this.confirmPasswordError = isFinalCheck
+      //       ? "两次输入的密码不一致"
+      //       : "";
+      //     return false;
+      //   }
+      //   this.confirmPasswordError = "";
+      //   return true;
+      // },
       async updateInfo() {
-        if (
-          !(await this.validateUsername(true)) ||
-          !this.validatePassword(true) ||
-          !this.validateConfirmPassword(true)
-        ) {
-          return;
-        }
+        // if (
+        //   !(await this.validateUsername(true)) ||
+        //   !this.validatePassword(true) ||
+        //   !this.validateConfirmPassword(true)
+        // ) {
+        //   return;
+        // }
   
         this.isUpdating = true;
   
@@ -174,10 +171,10 @@
             photoURL: avatarUrl,
           });
   
-          // 更新密码
-          const credential = EmailAuthProvider.credential(user.email, this.currentPassword);
-        //   await reauthenticateWithCredential(user, credential);
-          await updatePassword(user, this.password);
+          // // 更新密码
+          // const credential = EmailAuthProvider.credential(user.email, this.currentPassword);
+        
+          // await updatePassword(user, this.password);
   
           // 更新 Vuex
           this.$store.commit("auth/setUser", {

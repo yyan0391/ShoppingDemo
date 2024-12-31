@@ -1,21 +1,15 @@
 <template>
     <div>
         <van-nav-bar title="商品详情" left-text="返回" left-arrow @click-left="goBack" class="custom-title"></van-nav-bar>
-
+<div class="goods-photo-row">
         <van-row >
             <van-swipe ref="swipe" :autoplay="3000" class="" >
                 <van-swipe-item v-for="image in images" :key="image" class="detail-images">
                     <van-image :src="image" class="product-image"  fit="cover" width="100%"
                     height="100%" />
-                </van-swipe-item>
-
-
-
-                
+                </van-swipe-item>     
             </van-swipe>
         </van-row>
-
-
 
         <van-cell size="large" style="background-color: red;">
             <template #title>
@@ -78,19 +72,25 @@
                 <van-action-bar-icon icon="cart-o" :badge="cartCounter" @click="GoToCart">购物车
 
                 </van-action-bar-icon>
-                <van-action-bar-icon icon="star" text="收藏" color="#ff5000" />
+                <van-action-bar-icon 
+                    :icon="isFavorite ? 'star' : 'star-o'" 
+                    :text="isFavorite ? '已收藏' : '收藏'"  
+                    color="#ff5000"
+                    @click="toggleFavorite" />
                 <van-action-bar-button type="warning" @click="addGoodsToCart" text="加入购物车" />
                 <van-action-bar-button type="danger" text="立即购买" />
             </van-action-bar>
         </footer>
-
+</div>
     </div>
 
 </template>
 
 <script>
-import { showSuccessToast, showFailToast } from 'vant';
+import { showSuccessToast, showFailToast, showToast } from 'vant';
 import { nextTick } from 'vue';
+import { doc, setDoc, deleteDoc,getDoc } from "firebase/firestore";
+import { db } from "@/firebaseConfig";
 
 export default {
     name: "GoodDetail",
@@ -99,7 +99,11 @@ export default {
             value: 3,
             items: JSON.parse(this.$route.query.items || '[]'),
             images: [],
+            isFavorite: false,
         };
+    },
+    async created() {
+        await this.checkFavorite();
     },
     computed: {
         images() {
@@ -149,6 +153,52 @@ export default {
                 path: '/cart',
             })
         },
+        async toggleFavorite() {
+            const userId = this.$store.state.auth?.user?.uid;
+            if (!userId) {
+                showToast("请先登录");
+                return;
+            }
+            const favoriteRef = doc(db, `users/${userId}/favorites`, this.items.id);
+            try {
+                if (this.isFavorite) {
+                    // 取消收藏
+                    await deleteDoc(favoriteRef);
+                    this.isFavorite = false;
+                    showToast("已取消收藏");
+                } else {
+                    // 添加收藏
+                    const favoriteData = {
+                        productId: this.items.id,
+                        title: this.items.title,
+                        description: this.items.description,
+                        price: this.items.price,
+                        images: this.items.images,
+                        productDetailImages: this.items.productDetailImages,
+                        createdAt: new Date(),
+                    };
+                    await setDoc(favoriteRef, favoriteData);
+                    this.isFavorite = true;
+                    showToast("收藏成功");
+                }
+            } catch (error) {
+                console.error("收藏操作失败：", error);
+            }
+        },
+        async checkFavorite() {
+            const userId = this.$store.state.auth?.user?.uid;
+            if (!userId) {
+                return;
+            }
+
+            const favoriteRef = doc(db, `users/${userId}/favorites`, this.items.id);
+            const favoriteSnap = await getDoc(favoriteRef);
+
+            if (favoriteSnap.exists()) {
+                this.isFavorite = true;
+            }
+        },
+
 
     },
 
@@ -237,5 +287,15 @@ export default {
     /* 将底部标注固定在页面底部 */
     line-height: 2;
     border-top: 1px solid #e0e0e0;
+}
+
+.custom-title {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+.goods-photo-row {
+    margin-top: 50px;
 }
 </style>

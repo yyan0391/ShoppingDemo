@@ -14,6 +14,10 @@ import EditInfo from '@/components/Admin/EditInfo.vue';
 import AdminUploadGoods from '@/components/Admin/AdminUploadGoods.vue';
 import AdminEditGoods from '@/components/Admin/AdminEditGoods.vue';
 import AdminCoupon from '@/components/Admin/AdminCoupon.vue';
+import AdminUpdateGoods from '@/components/Admin/AdminUpdateGoods.vue';
+import Like from '@/components/Profile/Like.vue';
+import ChangePW from '@/components/Admin/ChangePW.vue';
+
 
 
 const routes = [
@@ -91,6 +95,24 @@ const routes = [
     {
         path: '/AdminCoupon',
         component: AdminCoupon,
+        meta: { showNavbar: false },
+        props: true,
+    },
+    {
+        path: '/AdminUpdateGoods',
+        component: AdminUpdateGoods,
+        meta: { showNavbar: false },
+        props: true,
+    },
+    {
+        path: '/Like',
+        component: Like,
+        meta: { showNavbar: false },
+        props: true,
+    },
+    {
+        path: '/ChangePW',
+        component: ChangePW,
         meta: { showNavbar: false },
         props: true,
     },

@@ -6,7 +6,7 @@
     </van-divider>
     <van-cell-group inset>
       <van-cell title="修改个人信息" is-link @click="goEditInfo" />
-      <van-cell title="支付设置" arrow />
+      <van-cell title="修改密码" is-link @click="goChangePW" arrow />
     </van-cell-group>
 
     <van-divider>
@@ -79,6 +79,9 @@ export default {
     },
     goEditInfo() {
       this.$router.push({ path: "/EditInfo" });
+    },
+    goChangePW() {
+      this.$router.push({ path: "/ChangePW" });
     },
 
     async handleLogout() {

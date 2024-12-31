@@ -11,7 +11,7 @@ export default defineConfig({
   assetsInclude: ['**/*.jpeg', '**/*.jpg', '**/*.png'], // 添加支持的图片格式
   plugins: [
     vue(),
-    vueDevTools(),
+    // vueDevTools(),
     
     // Components({
     //   resolvers: [VantResolver()],
