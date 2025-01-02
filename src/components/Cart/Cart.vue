@@ -39,7 +39,7 @@
                 <van-tag type="warning">单价：¥{{ item.price }}</van-tag>
               </template>
               <template #footer>
-                <van-stepper v-model="item.count" theme="round" button-size="22" @change="onStepperChange(item)" />
+                <van-stepper v-model="item.count" theme="round" button-size="22" @change="onStepperChange(item)" @click.stop />
               </template>
             </van-card>
           </van-swipe-cell>

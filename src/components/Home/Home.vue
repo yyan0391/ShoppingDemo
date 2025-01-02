@@ -2,7 +2,7 @@
     <div class="home">
         <van-nav-bar title="RIIZE" class="home-title"></van-nav-bar>
         <div class="home-search">
-            <van-search v-model="searchQuery"  placeholder="请输入搜索关键词" show-action shape="round" @search="onSearch"
+            <van-search v-model="searchQuery" placeholder="请输入搜索关键词" show-action shape="round" @search="onSearch"
                 @cancel="onCancel" />
 
             <van-swipe :autoplay="3000" lazy-render>
@@ -24,9 +24,12 @@
             <van-card class="card" v-for="(item, index) in filteredProducts" :key="index" :title="item.title"
                 @click="GoDetail(item)" :desc="item.description" :price="item.price" :tag="item.tag"
                 :thumb="item.images[0]">
-                <template #tags>
+                <!-- <template #tags>
                     <van-tag plain type="danger" style="margin-right: 6px;">消费券</van-tag>
                     <van-tag plain type="danger">满300减30</van-tag>
+                </template> -->
+                <template #tags>
+                    <van-tag v-for="coupon in item.coupons" :key="coupon" plain type="danger">{{ coupon.name }}</van-tag>
                 </template>
                 <template #footer>
                     <div style="display: flex; justify-content: flex-end; align-items: center;">

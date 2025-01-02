@@ -2,69 +2,96 @@
   <div>
     <van-nav-bar title="管理商品" left-text="返回" right-text="全选" @click-right="selectAll" left-arrow @click-left="goBack"
       class="custom-title"></van-nav-bar>
-    <van-overlay v-model:show="isDoing" z-index="2000">
+    <van-overlay v-model:show="isDoing" z-index="9000">
       <van-loading color="#1989fa" size="30px" type="spinner" vertical>加载中...</van-loading>
     </van-overlay>
-<div class="admin-edit-content">
-    <van-tabs v-model="activeTab" sticky>
-      <van-tab :title="`已上架 (${availableProducts.length})`">
-        <van-empty v-if="availableProducts.length === 0" description="暂无已上架商品">
-          <van-button round type="primary" class="bottom-button" @click="handleButtonClick">
-            添加商品
-          </van-button>
-        </van-empty>
-        <van-row v-else v-for="item in availableProducts" :key="item.id" class="cart-item">
-          <van-col span="3">
-            <van-checkbox v-model="item.checked" class="item-checkbox" @change="onCheckChange"></van-checkbox>
-          </van-col>
-          <van-col span="20">
-            <van-card @click="GoDetail(item)" :title="item.title" :thumb="item.images[0]" :desc="item.description"
-              :price="item.price" :num="item.quantity">
-              <template #tags>
-                <van-tag type="warning">单价：¥{{ item.price }}</van-tag>
-              </template>
-            </van-card>
-          </van-col>
-        </van-row>
+    <div class="admin-edit-content">
+      <van-tabs v-model="activeTab" sticky>
+        <van-tab :title="`已上架 (${availableProducts.length})`">
+          <van-empty v-if="availableProducts.length === 0" description="暂无已上架商品">
+            <van-button round type="primary" class="bottom-button" @click="handleButtonClick">
+              添加商品
+            </van-button>
+          </van-empty>
+          <van-row v-else v-for="item in availableProducts" :key="item.id" class="cart-item">
+            <van-col span="3">
+              <van-checkbox v-model="item.checked" class="item-checkbox" @change="onCheckChange"></van-checkbox>
+            </van-col>
+            <van-col span="20">
+              <van-card @click="GoDetail(item)" :title="item.title" :thumb="item.images[0]" :desc="item.description"
+                :price="item.price" :num="item.quantity">
+                <template #tags>
+                  <van-tag type="warning">单价：¥{{ item.price }}</van-tag>
+                </template>
+              </van-card>
+            </van-col>
+          </van-row>
 
-        <van-grid column-num="3" class="admin-bottom-buttons" border="false">
-          <van-grid-item icon="down" :disabled="selectedItems.length === 0"
-            :class="{ disabled: selectedItems.length === 0 }" @click="deleteSelected(false)" text="下架" />
-          <van-grid-item icon="edit" :disabled="selectedItems.length !== 1"
-            :class="{ disabled: selectedItems.length !== 1 }" @click="updateSelected" text="修改" />
-          <van-grid-item icon="coupon-o" :disabled="selectedItems.length !== 1"
-            :class="{ disabled: selectedItems.length !== 1 }" @click="updateSelected" text="优惠券权限" />
-        </van-grid>
+          <van-grid column-num="3" class="admin-bottom-buttons" border="false">
+            <van-grid-item icon="down" :disabled="selectedItems.length === 0"
+              :class="{ disabled: selectedItems.length === 0 }" @click="deleteSelected(false)" text="下架" />
+            <van-grid-item icon="edit" :disabled="selectedItems.length !== 1"
+              :class="{ disabled: selectedItems.length !== 1 }" @click="updateSelected" text="修改" />
+            <van-grid-item icon="coupon-o" :disabled="selectedItems.length === 0"
+              :class="{ disabled: selectedItems.length === 0 }" @click="showCoupon = true" text="优惠券权限" />
+          </van-grid>
+
+          <van-popup v-model:show="showCoupon" round position="bottom" style="height: 80%;">
+            <van-nav-bar title="选择优惠券" left-arrow @click-left="showCoupon = false" />
+
+            <!-- 使用 van-checkbox -->
+            <van-checkbox-group v-model="selectedCoupons">
+              <van-cell-group inset>
+                <van-cell v-for="coupon in coupons" :key="coupon.id" clickable >
+                  <template #title>
+                    <div>{{ coupon.name }} ({{ coupon.valueDesc }}{{ coupon.unitDesc }})</div>
+                    <van-tag type="primary">满 {{ coupon.originCondition }} {{ coupon.unitDesc }}可用</van-tag>
+                  </template>
+                  <template #label>
+                    <div>开始时间：{{ coupon.startAtFormatted }}</div>
+                    <div>结束时间：{{ coupon.endAtFormatted }}</div>
+                  </template>
+                  <template #right-icon>
+                    <van-checkbox :name="coupon.id" @click.stop/>
+                  </template>
+                </van-cell>
+              </van-cell-group>
+            </van-checkbox-group>
+            <van-button type="primary" block @click="assignCoupons">配置</van-button>
+
+          </van-popup>
 
 
-      </van-tab>
-      <van-tab :title="`下架商品 (${unavailableProducts.length})`">
-        <van-empty v-if="unavailableProducts.length === 0" description="暂无下架商品">
-        </van-empty>
-        <van-row v-else v-for="item in unavailableProducts" :key="item.id" class="cart-item">
-          <van-col span="3">
-            <van-checkbox v-model="item.checked" class="item-checkbox" @change="onCheckChange"></van-checkbox>
-          </van-col>
-          <van-col span="20">
-            <van-card :title="item.title" :thumb="item.images[0]" :desc="item.description" :price="item.price"
-              :num="item.quantity">
-              <template #tags>
-                <van-tag type="danger">下架商品</van-tag>
-              </template>
-            </van-card>
-          </van-col>
-        </van-row>
+        </van-tab>
+        <van-tab :title="`下架商品 (${unavailableProducts.length})`">
+          <van-empty v-if="unavailableProducts.length === 0" description="暂无下架商品">
+          </van-empty>
+          <van-row v-else v-for="item in unavailableProducts" :key="item.id" class="cart-item">
+            <van-col span="3">
+              <van-checkbox v-model="item.checked" class="item-checkbox" @change="onCheckChange"></van-checkbox>
+            </van-col>
+            <van-col span="20">
+              <van-card :title="item.title" :thumb="item.images[0]" :desc="item.description" :price="item.price"
+                :num="item.quantity">
+                <template #tags>
+                  <van-tag type="danger">下架商品</van-tag>
+                </template>
+              </van-card>
+            </van-col>
+          </van-row>
 
-        <van-grid column-num="2" class="admin-bottom-buttons" border="false">
-          <van-grid-item icon="back-top" :disabled="selectedItems.length === 0"
-            :class="{ disabled: selectedItems.length === 0 }" @click="deleteSelected(true)" text="上架" />
-          <van-grid-item icon="delete" :disabled="selectedItems.length === 0"
-            :class="{ disabled: selectedItems.length === 0 }" @click="deleteForever" text="永久删除" />
-        </van-grid>
+          <van-grid column-num="2" class="admin-bottom-buttons" border="false">
+            <van-grid-item icon="back-top" :disabled="selectedItems.length === 0"
+              :class="{ disabled: selectedItems.length === 0 }" @click="deleteSelected(true)" text="上架" />
+            <van-grid-item icon="delete" :disabled="selectedItems.length === 0"
+              :class="{ disabled: selectedItems.length === 0 }" @click="deleteForever" text="永久删除" />
+          </van-grid>
 
-      </van-tab>
-    </van-tabs>
-</div>
+
+
+        </van-tab>
+      </van-tabs>
+    </div>
   </div>
 </template>
 
@@ -86,6 +113,9 @@ export default {
       selectedItems: [],
       isDoing: false,
       activeTab: 0,
+      showCoupon: false,
+      coupons: [], // 存储所有优惠券
+      selectedCoupons: [], // 存储选中的优惠券
     };
   },
   computed: {
@@ -101,8 +131,20 @@ export default {
   },
   async created() {
     await this.fetchProducts(); // 在页面创建时获取商品数据
+    await this.fetchCoupons();
   },
   methods: {
+    async fetchCoupons() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "coupons"));
+        this.coupons = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+      } catch (error) {
+        console.error("获取优惠券失败：", error);
+      }
+    },
     GoDetail(item) {
       console.log(item);
       this.$router.push({
@@ -239,6 +281,37 @@ export default {
         }
       })
     },
+
+    assignCoupons() {
+      if (this.selectedCoupons.length === 0) {
+        showToast("请先选择至少一个优惠券");
+        return;
+      }
+
+      this.isDoing = true;
+
+      Promise.all(
+        this.selectedItems.map(async (item) => {
+          const productRef = doc(db, "products", item.id);
+          const assignedCoupons = this.selectedCoupons.map((couponId) =>
+            this.coupons.find((coupon) => coupon.id === couponId)
+          );
+          await updateDoc(productRef, { coupons: assignedCoupons });
+        })
+      )
+        .then(() => {
+          showToast("优惠券权限配置成功");
+          this.showCouponPopup = false;
+        })
+        .catch((error) => {
+          console.error("优惠券权限配置失败：", error);
+          showToast("配置失败，请稍后重试");
+        })
+        .finally(() => {
+          this.isDoing = false;
+        });
+    },
+
     async deleteProductImages(item) {
       try {
         // 删除商品主图片
@@ -285,17 +358,8 @@ export default {
         },
       });
     },
-    grantCoupon() {
-      if (this.selectedItems.length !== 1) {
-        showToast("只能选择一个商品授予优惠券权限");
-        return;
-      }
-      const selectedItem = this.selectedItems[0];
-      showToast(`优惠券权限已授予：${selectedItem.title}`);
-      // 添加实际的优惠券授予逻辑
-    },
 
-    
+
   },
 }
 </script>

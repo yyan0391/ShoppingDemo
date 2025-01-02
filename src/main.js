@@ -27,6 +27,7 @@ import {
     Tab, 
     Tabs,
     Picker,
+    Calendar,
 
  } from 'vant';
 import router from './router'
@@ -86,6 +87,7 @@ app.use(FloatingPanel);
 app.use(Tab);
 app.use(Tabs);
 app.use(Picker);
+app.use(Calendar);
 
 app.mount('#app');
 

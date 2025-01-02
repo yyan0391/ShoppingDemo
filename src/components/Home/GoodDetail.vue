@@ -20,8 +20,7 @@
                 <span style="color: whitesmoke;">已售 {{ items.sold || 0}}</span>
             </template>
             <template #label>
-                <van-tag plain type="danger" size="medium" style="margin-right: 6px; font-weight: bold;">消费券</van-tag>
-                <van-tag plain type="danger" size="medium" style="font-weight: bold;">满300减30</van-tag>
+                <van-tag v-for="coupon in items.coupons" :key="coupon.id" plain type="danger" size="medium" style="margin-right: 6px; font-weight: bold;">{{ coupon.name }}</van-tag>
             </template>
         </van-cell>
 

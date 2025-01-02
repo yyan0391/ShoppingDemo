@@ -42,7 +42,9 @@
                     close-on-click-action @select="onSelect" />
                 <van-cell title="运费（消费满49元包邮*）" :value="postageDisplay">
                 </van-cell>
-                <van-coupon-cell :coupons="coupons" :chosen-coupon="chosenCoupon" @click="showList = true" />
+                <van-coupon-cell :coupons="coupons" 
+                    :chosen-coupon="availableCoupons.findIndex(c => c.id === (chosenCoupon?.id || ''))"
+                    @click="openCouponPopup" />
             </van-cell-group>
 
             <van-cell-group inset style="margin: 15px; padding: 10px;">
@@ -50,8 +52,19 @@
                 </van-cell>
             </van-cell-group>
             <van-popup v-model:show="showList" round position="bottom" style="height: 90%; padding-top: 4px;">
-                <van-coupon-list :coupons="coupons" :chosen-coupon="chosenCoupon" :disabled-coupons="disabledCoupons"
-                    @change="onChange" @exchange="onExchange" />
+                <van-coupon-list :coupons="availableCoupons.map(coupon => ({
+                    ...coupon,
+                    originCondition: coupon.originCondition * 100,
+                    startAtText: formatTimestamp(coupon.startAt),
+                    endAtText: formatTimestamp(coupon.endAt),
+                }))" :disabled-coupons="disabledCoupons.map(coupon => ({
+                    ...coupon,
+                    originCondition: coupon.originCondition * 100,
+                    startAtText: formatTimestamp(coupon.startAt),
+                    endAtText: formatTimestamp(coupon.endAt),
+                }))" 
+                :chosen-coupon="availableCoupons.findIndex(c => c.id === (chosenCoupon?.id || ''))"
+                @change="onChange" @exchange="onExchange" />
             </van-popup>
 
         </div>
@@ -117,12 +130,10 @@
 </template>
 
 <script>
-import { Divider } from 'vant';
-import { ref } from 'vue';
 import { showConfirmDialog, showToast } from 'vant';
 import { mapGetters } from "vuex";
 import Login from "@/components/Login.vue";
-import { doc, setDoc, collection ,updateDoc} from "firebase/firestore";
+import { doc, setDoc, collection, updateDoc } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
 
 export default {
@@ -130,75 +141,17 @@ export default {
     components: {
         Login,
     },
-    setup() {
-        const show = ref(false);
-        const actions = [
-            { name: '顺丰普快' },
-            { name: '顺丰特快' },
-            { name: '次日达', subname: '购物专供' },
-        ];
-
-        const coupon = {
-            available: 1,
-            originCondition: 0,
-            reason: '未满500元，不可用',
-            value: 150,
-            name: '消费券',
-            startAt: 1489104000,
-            endAt: 1514592000,
-            valueDesc: '1.5',
-            unitDesc: '元',
-        };
-        const coupon2 = {
-            available: 0, // 不可用优惠券
-            originCondition: 20000,
-            reason: '该优惠券已过期',
-            value: 5000,
-            name: '满200减50',
-            startAt: 1489104000,
-            endAt: 1514592000,
-            valueDesc: '50',
-            unitDesc: '元',
-        };
-
-        const coupon3 = {
-            available: 1,
-            originCondition: 0, // 无门槛使用
-            reason: '',
-            value: 2000,
-            name: '无门槛优惠券',
-            startAt: 1489104000,
-            endAt: 1514592000,
-            valueDesc: '20',
-            unitDesc: '元',
-        };
-
-
-        const coupons = ref([coupon, coupon2, coupon3]);
-        const showList = ref(false);
-        const chosenCoupon = ref(-1);
-
-        const onChange = (index) => {
-            showList.value = false;
-            chosenCoupon.value = index;
-        };
-        const onExchange = (code) => {
-            coupons.value.push(coupon);
-        };
-
-        return {
-            coupons,
-            showList,
-            onChange,
-            onExchange,
-            chosenCoupon,
-            disabledCoupons: [coupon],
-            show,
-            actions,
-        };
-    },
     data() {
         return {
+            show: false,
+            actions: [
+                { name: '顺丰普快' },
+                { name: '顺丰特快' },
+                { name: '次日达', subname: '购物专供' },
+            ],
+            coupons: [], // 初始化优惠券
+            showList: false,
+            chosenCoupon: null,
             showNavbar: true,
             needPostage: true,
             postage: 12,
@@ -209,11 +162,151 @@ export default {
             selectedPay: "",
             isPlacingOrder: false,
             isPaying: false,
-
-        }
+            availableCoupons: [],
+            disabledCoupons: [],
+        };
     },
-    name: 'CheckOut',
+    computed: {
+        ...mapGetters("auth", ["username", "isLogin", "uid"]),
+
+        cartGoods() {
+            return this.$store.state.checkGoods;
+        },
+        address() {
+            return this.$store.state.selectedAddress;
+        },
+        amount() {
+            let cartGoods = this.$store.state.checkGoods;
+            let result = 0;
+            cartGoods.forEach(good => {
+                result += good.price * good.count;
+            });
+            return result * 100;
+        },
+        postageAmount() {
+            return this.amount >= 4900 ? 0 : this.postage * 100;
+        },
+        shippingTip() {
+            if (this.amount >= 4900) {
+                return "实际消费满49元免邮费，已包邮";
+            } else {
+                const remaining = (4900 - this.amount) / 100; // 计算还需消费金额
+                return `实际消费满49元免邮费，仍需消费 ¥${remaining.toFixed(2)}`;
+            }
+        },
+        pay() {
+            let discount = 0;
+            if (this.chosenCoupon !== null) {
+                discount = this.chosenCoupon.valueDesc; // 获取选中优惠券的 value
+            }
+
+            let total = this.amount - discount*100;
+
+            total += this.postageAmount;
+
+            return Math.max(total, 0);
+        },
+        postageDisplay() {
+            return `¥ ${(this.postageAmount / 100).toFixed(2)}`;
+        },
+    },
     methods: {
+        formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const day = String(date.getDate()).padStart(2, "0");
+            return `${year}.${month}.${day}`;
+        },
+        getAvailableCoupons() {
+
+            return this.cartGoods.map((item) => {
+                const availableCoupons = [];
+                const disabledCoupons = [];
+
+                // 分组优惠券
+                this.coupons.forEach((coupon) => {
+                    if (item.price * item.count >= coupon.originCondition) {
+                        availableCoupons.push(coupon);
+                    } else {
+                        disabledCoupons.push({
+                            ...coupon,
+                            reason: `需消费满 ${coupon.originCondition} 元`,
+                        });
+                    }
+                });
+
+                return {
+                    ...item,
+                    availableCoupons,
+                    disabledCoupons,
+                };
+            });
+        },
+
+        openCouponPopup() {
+            const couponMap = new Map(); // 初始化为 Map 类型
+
+            // 遍历选中商品，提取所有优惠券并去重
+            this.cartGoods.forEach((item) => {
+                if (item.coupons && Array.isArray(item.coupons)) {
+                    item.coupons.forEach((coupon) => {
+                        if (!couponMap.has(coupon.id)) {
+                            couponMap.set(coupon.id, coupon); // 根据 id 去重
+                        }
+                    });
+                }
+            });
+
+            // 将 Map 转为数组
+            const uniqueCoupons = Array.from(couponMap.values());
+
+            // uniqueCoupons.forEach((coupon) => {
+            //     console.log("Coupon: ", coupon);
+            //     console.log("Start At: ", coupon.startAt);
+            //     console.log("End At: ", coupon.endAt);
+            //     console.log("Current Time: ", Date.now());
+            // });
+
+            // console.log(this.amount);
+            // 筛选可用优惠券和不可用优惠券
+            this.availableCoupons = uniqueCoupons.filter(
+                (coupon) =>
+                    Date.now() >= coupon.startAt &&
+                    Date.now() <= coupon.endAt &&
+                    (this.amount / 100) >= coupon.originCondition
+            );
+
+            this.disabledCoupons = uniqueCoupons.filter(
+                (coupon) =>
+                    Date.now() > coupon.endAt || // 过期
+                    (this.amount / 100) < coupon.originCondition // 总金额不足
+            );
+
+            console.log(this.availableCoupons);
+
+            this.showList = true; // 显示优惠券弹窗
+        },
+
+        onChange(index) {
+            this.showList = false;
+            console.log("xuanzhongde "+this.availableCoupons[index]);
+            this.chosenCoupon = this.availableCoupons[index];
+        },
+        onExchange(code) {
+            const newCoupon = {
+                id: `new-${Date.now()}`,
+                name: `兑换券-${code}`,
+                originCondition: 200,
+                valueDesc: "20",
+                unitDesc: "元",
+                startAt: Date.now(),
+                endAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 有效期7天
+            };
+            this.coupons.push(newCoupon);
+            this.openCouponPopup();
+        },
         selectPay(pay) {
             this.selectedPay = pay; // 设置选中的支付方式
             this.showPay = false; // 关闭弹窗
@@ -221,8 +314,7 @@ export default {
         onClickLeft() {
             showConfirmDialog({
                 title: '确定返回吗？',
-                message:
-                    '返回后，当前选择将不被保存。',
+                message: '返回后，当前选择将不被保存。',
                 confirmButtonText: '返回',
                 cancelButtonText: '再想想',
             })
@@ -232,7 +324,6 @@ export default {
                 .catch(() => {
                     // on cancel
                 });
-
         },
         async onClickpay() {
             if (this.address === null) {
@@ -242,12 +333,12 @@ export default {
                 showToast('请选择配送方式');
                 return;
             } else if (this.selectedPay === '') {
-                showToast('请选择支付方式')
+                showToast('请选择支付方式');
                 return;
-            } else if (this.isLogin === false) {
+            } else if (!this.isLogin) {
                 showToast('请先登录');
                 this.showLogin = true;
-
+                return;
             }
 
             this.isPaying = true;
@@ -268,10 +359,10 @@ export default {
                     paymentMethod: this.selectedPay,
                     shippingMethod: this.selectedValue,
                 };
-                // 上传订单数据到Firestore
+                // 上传订单数据到 Firestore
                 const ordersCollection = collection(db, `users/${this.uid}/orders`);
-                const neworderRef = doc(ordersCollection);
-                await setDoc(neworderRef, orderData);
+                const newOrderRef = doc(ordersCollection);
+                await setDoc(newOrderRef, orderData);
 
                 // 对应商品库存减少
                 for (const item of this.cartGoods) {
@@ -279,12 +370,11 @@ export default {
 
                     await updateDoc(productRef, {
                         quantity: item.quantity - item.count, // 减少库存
-                        sold: (item.sold || 0) + item.count,  // 增加已售数量
+                        sold: (item.sold || 0) + item.count, // 增加已售数量
                     });
                 }
 
-
-                const orderId = neworderRef.id;
+                const orderId = newOrderRef.id;
 
                 showToast('订单提交成功');
                 this.$router.push({
@@ -299,12 +389,11 @@ export default {
                 this.isPlacingOrder = false;
                 this.isPaying = false;
             }
-
         },
         GoToAddress() {
             this.$router.push({
                 path: '/address',
-            })
+            });
         },
         onSelect(action) {
             this.selectedValue = action.name;
@@ -312,74 +401,7 @@ export default {
         },
     },
 
-    computed: {
-
-        // ...mapState("auth", ["user"]),
-        ...mapGetters("auth", ["username", "isLogin", "uid"]),
-
-        cartGoods() {
-            return this.$store.state.checkGoods;
-        },
-        address() {
-            return this.$store.state.selectedAddress;
-        },
-        //商品总价
-        amount() {
-            let cartGoods = this.$store.state.checkGoods;
-            let result = 0;
-            cartGoods.forEach(good => {
-                result += good.price * good.count;
-            })
-            return result * 100;
-        },
-        counter() {
-            let that = this;
-            let cartGoods = this.$store.state.checkGoods;
-            let result = 0;
-            cartGoods.some(good => {
-                if (good.id === that.id) {
-                    result = good.count;
-                }
-            });
-            return result;
-        },
-        postageAmount() {
-            // 如果总金额 >= 49 元，则运费为 0；否则运费为 12 元（以分为单位）
-            return this.amount >= 4900 ? 0 : this.postage * 100;
-        },
-        shippingTip() {
-            if (this.amount >= 4900) {
-                return "实际消费满49元免邮费，已包邮";
-            } else {
-                const remaining = (4900 - this.amount) / 100; // 计算还需消费金额
-                return `实际消费满49元免邮费，仍需消费 ¥${remaining.toFixed(2)}`;
-            }
-        },
-
-        // 合计支付金额
-        pay() {
-            // 获取当前选中优惠券金额
-            let discount = 0;
-            if (this.chosenCoupon !== -1) {
-                discount = this.coupons[this.chosenCoupon].value; // 获取选中优惠券的 value
-            }
-
-            // 计算优惠后的总金额
-            let total = this.amount - discount;
-
-            // 判断是否需要运费
-            total += this.postageAmount;
-
-            // 最小值为 0，防止出现负数
-            return Math.max(total, 0);
-        },
-        postageDisplay() {
-            // 运费金额格式化为 "元"
-            return `¥ ${(this.postageAmount / 100).toFixed(2)}`;
-        },
-    },
-}
-
+};
 </script>
 
 <style>
