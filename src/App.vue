@@ -1,13 +1,27 @@
 <script>
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
+import { fetchUserRoleFromDatabase } from "@/firebaseService";
 
 export default {
   created() {
+    // onAuthStateChanged(auth, async (user) => {
+    //   if (user) {
+    //     this.$store.commit("auth/setUser", user);
+    //     await this.$store.commit("initializeCart"); // 初始化购物车
+    //   } else {
+    //     this.$store.commit("auth/clearUser");
+    //   }
+    // });
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        this.$store.commit("auth/setUser", user);
-        await this.$store.commit("initializeCart"); // 初始化购物车
+        // 从 Firebase 获取角色信息
+        const userDoc = await fetchUserRoleFromDatabase(user.uid);
+        const role = userDoc?.role || "user";
+
+        // 提交用户信息和角色到 Vuex
+        this.$store.commit("auth/setUser", { ...user, role });
+        await this.$store.commit("initializeCart");
       } else {
         this.$store.commit("auth/clearUser");
       }

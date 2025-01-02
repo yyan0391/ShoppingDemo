@@ -3,7 +3,7 @@ export default {
     namespaced: true,
     state: {
       user: null, // 保存用户信息
-      role: "user", // 保存用户角色
+      role: null, // 保存用户角色
     },
     mutations: {
       setUser(state, user) {

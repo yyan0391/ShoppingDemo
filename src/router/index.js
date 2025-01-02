@@ -17,7 +17,8 @@ import AdminCoupon from '@/components/Admin/AdminCoupon.vue';
 import AdminUpdateGoods from '@/components/Admin/AdminUpdateGoods.vue';
 import Like from '@/components/Profile/Like.vue';
 import ChangePW from '@/components/Admin/ChangePW.vue';
-
+import OrderDetail from '@/components/Cart/OrderDetail.vue';
+import OrderList from '@/components/Cart/OrderList.vue';
 
 
 const routes = [
@@ -113,6 +114,18 @@ const routes = [
     {
         path: '/ChangePW',
         component: ChangePW,
+        meta: { showNavbar: false },
+        props: true,
+    },
+    {
+        path: '/OrderDetail/:orderId',
+        component: OrderDetail,
+        meta: { showNavbar: false },
+        props: true,
+    },
+    {
+        path: '/OrderList',
+        component: OrderList,
         meta: { showNavbar: false },
         props: true,
     },

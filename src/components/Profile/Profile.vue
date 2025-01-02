@@ -171,7 +171,7 @@ export default {
       if (!this.isLogin) {
         showFailToast('请先登录');
       } else {
-        this.$router.push({ path: "/Profile/Orders" });
+        this.$router.push({ path: "/OrderList" });
       }
     },
     // 我的收藏
@@ -244,7 +244,14 @@ export default {
       })
     },
     handleHelp() {
-      this.$router.push({ path: "/Help" });
+      showDialog({
+        title: '联系我们寻求帮助',
+        message: `
+      <p><strong style="font-size: 16px;">email </strong><br>yyfbts@qq.com</p>
+    `,
+    allowHtml: true,
+    messageAlign: 'left',
+      })
     },
   }
 

@@ -17,7 +17,7 @@
                 <span style="font-weight: bold; font-size: 24px; color: whitesmoke;">{{ items.price }}</span>
             </template>
             <template #value>
-                <span style="color: whitesmoke;">已售 1万+</span>
+                <span style="color: whitesmoke;">已售 {{ items.sold || 0}}</span>
             </template>
             <template #label>
                 <van-tag plain type="danger" size="medium" style="margin-right: 6px; font-weight: bold;">消费券</van-tag>
