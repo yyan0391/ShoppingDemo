@@ -42,36 +42,41 @@
                     close-on-click-action @select="onSelect" />
                 <van-cell title="运费（消费满49元包邮*）" :value="postageDisplay">
                 </van-cell>
-                <van-coupon-cell :coupons="coupons" 
-                    :chosen-coupon="availableCoupons.findIndex(c => c.id === (chosenCoupon?.id || ''))"
-                    @click="openCouponPopup" />
+                <van-cell title="优惠券" is-link @click="openCouponPopup">
+                    <template #value>
+                        {{ chosenCouponIndex !== -1 ? `已选择：${availableCoupons[chosenCouponIndex].name}` : '未选择' }}
+                    </template>
+                </van-cell>
             </van-cell-group>
 
             <van-cell-group inset style="margin: 15px; padding: 10px;">
                 <van-cell title="支付方式" is-link :value="selectedPay || '请选择支付方式'" @click="showPay = true">
                 </van-cell>
             </van-cell-group>
+
+            <!-- 优惠券popup -->
             <van-popup v-model:show="showList" round position="bottom" style="height: 90%; padding-top: 4px;">
-                <van-coupon-list :coupons="availableCoupons.map(coupon => ({
+                <van-coupon-list 
+                :coupons="availableCoupons.map(coupon => ({
                     ...coupon,
                     originCondition: coupon.originCondition * 100,
-                    startAtText: formatTimestamp(coupon.startAt),
-                    endAtText: formatTimestamp(coupon.endAt),
+                    // startAtText: formatTimestamp(coupon.startAt),
+                    startAt: coupon.startAt,
+                    endAt: coupon.endAt,
                 }))" :disabled-coupons="disabledCoupons.map(coupon => ({
                     ...coupon,
                     originCondition: coupon.originCondition * 100,
-                    startAtText: formatTimestamp(coupon.startAt),
-                    endAtText: formatTimestamp(coupon.endAt),
-                }))" 
-                :chosen-coupon="availableCoupons.findIndex(c => c.id === (chosenCoupon?.id || ''))"
-                @change="onChange" @exchange="onExchange" />
+                    startAt: coupon.startAt,
+                    endAt: coupon.endAt,
+                }))" :chosen-coupon="chosenCouponIndex" @change="onChange" @exchange="onExchange">
+                </van-coupon-list>
             </van-popup>
 
         </div>
 
 
         <footer class="co-footer">
-            <van-submit-bar :price="pay" button-text="去支付" @submit="onClickpay" tip-icon="info-o">
+            <van-submit-bar :price="pay()" button-text="去支付" @submit="onClickpay" tip-icon="info-o">
                 <template #tip> {{ shippingTip }} </template>
             </van-submit-bar>
         </footer>
@@ -135,6 +140,7 @@ import { mapGetters } from "vuex";
 import Login from "@/components/Login.vue";
 import { doc, setDoc, collection, updateDoc } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
+import { toRaw } from "vue";
 
 export default {
     name: "checkout",
@@ -152,6 +158,7 @@ export default {
             coupons: [], // 初始化优惠券
             showList: false,
             chosenCoupon: null,
+            chosenCouponIndex: -1,
             showNavbar: true,
             needPostage: true,
             postage: 12,
@@ -194,23 +201,36 @@ export default {
                 return `实际消费满49元免邮费，仍需消费 ¥${remaining.toFixed(2)}`;
             }
         },
-        pay() {
-            let discount = 0;
-            if (this.chosenCoupon !== null) {
-                discount = this.chosenCoupon.valueDesc; // 获取选中优惠券的 value
-            }
-
-            let total = this.amount - discount*100;
-
-            total += this.postageAmount;
-
-            return Math.max(total, 0);
-        },
         postageDisplay() {
             return `¥ ${(this.postageAmount / 100).toFixed(2)}`;
         },
     },
     methods: {
+        pay() {
+            let discount = 0;
+            if (this.chosenCouponIndex !== -1) {
+                discount = this.availableCoupons[this.chosenCouponIndex].valueDesc;
+            }
+
+            let total = this.amount - discount * 100;
+
+            total += this.postageAmount;
+
+            return Math.max(total, 0);
+        },
+        getChosenCouponIndex() {
+            if (!this.chosenCoupon || !this.chosenCoupon.id) {
+                return -1; // 如果没有选中优惠券，返回 -1
+            }
+
+            // 在可用优惠券中查找选中优惠券的索引
+            const index = this.availableCoupons.findIndex(
+                (coupon) => coupon.id === this.chosenCoupon.id
+            );
+
+            this.chosenCouponIndex = index;
+        },
+
         formatTimestamp(timestamp) {
             const date = new Date(timestamp);
 
@@ -220,13 +240,15 @@ export default {
             return `${year}.${month}.${day}`;
         },
         getAvailableCoupons() {
-
             return this.cartGoods.map((item) => {
                 const availableCoupons = [];
                 const disabledCoupons = [];
 
+
                 // 分组优惠券
                 this.coupons.forEach((coupon) => {
+                    coupon.startAt = Number(coupon.startAt);
+                    coupon.endAt = Number(coupon.endAt);
                     if (item.price * item.count >= coupon.originCondition) {
                         availableCoupons.push(coupon);
                     } else {
@@ -235,8 +257,8 @@ export default {
                             reason: `需消费满 ${coupon.originCondition} 元`,
                         });
                     }
-                });
 
+                });
                 return {
                     ...item,
                     availableCoupons,
@@ -250,6 +272,7 @@ export default {
 
             // 遍历选中商品，提取所有优惠券并去重
             this.cartGoods.forEach((item) => {
+                
                 if (item.coupons && Array.isArray(item.coupons)) {
                     item.coupons.forEach((coupon) => {
                         if (!couponMap.has(coupon.id)) {
@@ -262,14 +285,6 @@ export default {
             // 将 Map 转为数组
             const uniqueCoupons = Array.from(couponMap.values());
 
-            // uniqueCoupons.forEach((coupon) => {
-            //     console.log("Coupon: ", coupon);
-            //     console.log("Start At: ", coupon.startAt);
-            //     console.log("End At: ", coupon.endAt);
-            //     console.log("Current Time: ", Date.now());
-            // });
-
-            // console.log(this.amount);
             // 筛选可用优惠券和不可用优惠券
             this.availableCoupons = uniqueCoupons.filter(
                 (coupon) =>
@@ -277,22 +292,41 @@ export default {
                     Date.now() <= coupon.endAt &&
                     (this.amount / 100) >= coupon.originCondition
             );
-
+            
             this.disabledCoupons = uniqueCoupons.filter(
                 (coupon) =>
                     Date.now() > coupon.endAt || // 过期
+                    Date.now() < coupon.startAt || // 未开始
                     (this.amount / 100) < coupon.originCondition // 总金额不足
             );
 
-            console.log(this.availableCoupons);
+            this.availableCoupons.forEach((coupon) => {
+                coupon.startAt = Number(coupon.startAt)  / 1000;
+                coupon.endAt = Number(coupon.endAt)  / 1000;
+            });
 
+            this.disabledCoupons.forEach((coupon) => {
+                coupon.startAt = Number(coupon.startAt)  / 1000;
+                coupon.endAt = Number(coupon.endAt) / 1000;
+            });
+
+            console.log(this.availableCoupons);
+            console.log(this.disabledCoupons);
             this.showList = true; // 显示优惠券弹窗
         },
 
         onChange(index) {
-            this.showList = false;
-            console.log("xuanzhongde "+this.availableCoupons[index]);
-            this.chosenCoupon = this.availableCoupons[index];
+            if (index === -1) {
+                // 如果用户点击“不选择”，将 chosenCoupon 设置为 -1
+                this.chosenCouponIndex = -1;
+            } else {
+                this.getChosenCouponIndex();
+
+                this.chosenCouponIndex = index;
+                console.log(this.chosenCoupon);
+            }
+
+            this.showList = false; // 关闭弹窗
         },
         onExchange(code) {
             const newCoupon = {
@@ -419,19 +453,14 @@ export default {
 }
 
 .address-cell {
-    /* border-radius: 12px; */
-    /* width: 100%; */
     padding: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .card {
     background-color: #ffffff;
-    /* 设置背景颜色 */
     border-radius: 12px;
-    /* 可选：添加圆角 */
     padding: 10px;
-    /* 可选：调整内边距 */
 }
 
 .co-footer {
@@ -447,14 +476,10 @@ export default {
 
     .van-submit-bar {
         position: absolute;
-        /* 让 van-action-bar 定位在 footer 的顶部 */
         top: 0;
-        /* 靠近 footer 的顶部 */
         left: 0;
         width: 100%;
-        /* 占满 footer 的宽度 */
         z-index: 1;
-        /* 确保它显示在其他内容上方 */
     }
 }
 
