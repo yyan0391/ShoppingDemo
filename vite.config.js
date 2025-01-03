@@ -8,7 +8,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // base: '/ShoppingDemo/',
+  base: '/ShoppingDemo/',
   assetsInclude: ['**/*.jpeg', '**/*.jpg', '**/*.png'], // 添加支持的图片格式
   plugins: [
     vue(),
