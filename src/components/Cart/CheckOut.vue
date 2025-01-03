@@ -301,13 +301,13 @@ export default {
             );
 
             this.availableCoupons.forEach((coupon) => {
-                coupon.startAt = Number(coupon.startAt)  / 1000;
-                coupon.endAt = Number(coupon.endAt)  / 1000;
+                coupon.startAt = Number(coupon.startAt);
+                coupon.endAt = Number(coupon.endAt) ;
             });
 
             this.disabledCoupons.forEach((coupon) => {
-                coupon.startAt = Number(coupon.startAt)  / 1000;
-                coupon.endAt = Number(coupon.endAt) / 1000;
+                coupon.startAt = Number(coupon.startAt)  ;
+                coupon.endAt = Number(coupon.endAt) ;
             });
 
             console.log(this.availableCoupons);

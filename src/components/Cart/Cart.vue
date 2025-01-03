@@ -1,9 +1,6 @@
 <template>
   <div class="cart-background">
     <van-nav-bar title="我的购物车" @click-left="goBack" class="fix-custom-title">
-      <template #right>
-        <span @click="CartManage">管理</span>
-      </template>
     </van-nav-bar>
     <div class="cart-content">
       <van-search v-model="searchQuery" placeholder="请输入购物车搜索关键词" show-action shape="round" @search="onSearch"
